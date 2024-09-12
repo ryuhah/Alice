@@ -108,7 +108,7 @@ const Information = () => {
             const priorityA = conditionPriority[a.member.condition as ConditionType] || 0
             const priorityB = conditionPriority[b.member.condition as ConditionType] || 0
 
-            if (order == 'asc') {
+            if (order === 'asc') {
                 return priorityA - priorityB
             } else {
                 return priorityB - priorityA
