@@ -11,24 +11,11 @@ import { ApexOptions } from 'apexcharts'
 const PersonalInformation = () => {
 
     const { no } = useParams<{ no: string }>();
-    // const user = dummyData.find(user => user.no.toString() === no);
     const [userInfo, setUserInfo] = useState<any | null>(null)
     const [userCondition, setUserConditon] = useState<string | null>(null)
-    // const [chartData, setChartData] = useState<{ hr: number[]; spo2: number[] }>({ hr: [], spo2: [] });
-    // const [scoreChartData, setScoreChartData] = useState<{ wellness: number[]; physical: number[]; mental: number[] }>({ wellness: [], physical: [], mental: [] });
+    const [chartData, setChartData] = useState<{ hr: number[]; spo2: number[] }>({ hr: [], spo2: [] });
+    const [scoreChartData, setScoreChartData] = useState<{ wellness: number[]; physical: number[]; mental: number[] }>({ wellness: [], physical: [], mental: [] });
     const [dates, setDates] = useState<string[]>([]); // 날짜 저장
-
-    // 임시데이터
-    const [chartData] = useState<{ hr: number[], spo2: number[] }>({
-        hr: [70, 75, 80, 65, 90, 85, 78],
-        spo2: [98, 97, 96, 95, 94, 96, 97]
-    })
-
-    const [scoreChartData] = useState<{ wellness : number[], physical : number[], mental : number[]}>({
-        wellness : [4, 5, 6, 7, 3, 6, 6],
-        physical : [6, 6, 8, 7, 5, 6, 8],
-        mental : [2, 5, 3, 6, 2, 6, 4]
-    })
 
     useEffect(() => {
         const fatchMember = async () => {
@@ -53,16 +40,16 @@ const PersonalInformation = () => {
                 console.log("사용자 차트 정보" + JSON.stringify(response3.data))
 
                 // 차트 데이터를 상태로 설정
-                // setChartData({
-                //     hr: memberCharts.hr.map((item: any) => item.value),
-                //     spo2: memberCharts.spo2.map((item: any) => item.value),
-                // });
+                setChartData({
+                    hr: memberCharts.hr.map((item: any) => item.value),
+                    spo2: memberCharts.spo2.map((item: any) => item.value),
+                });
         
-                // setScoreChartData({
-                //     wellness: memberCharts.wellness.map((item: any) => item.score),
-                //     physical: memberCharts.physical.map((item: any) => item.score),
-                //     mental: memberCharts.mental.map((item: any) => item.score),
-                // });
+                setScoreChartData({
+                    wellness: memberCharts.wellness.map((item: any) => item.score),
+                    physical: memberCharts.physical.map((item: any) => item.score),
+                    mental: memberCharts.mental.map((item: any) => item.score),
+                });
   
             } catch (error) {
                 console.log("데이터 조회 실패" + error)
@@ -70,7 +57,7 @@ const PersonalInformation = () => {
         }
 
         fatchMember()
-    },[])
+    },[no])
 
     if (!userInfo) {
         return <div>유저를 찾을 수 없습니다.</div>;
@@ -92,7 +79,6 @@ const PersonalInformation = () => {
         },
         xaxis: {
             categories: ['7일 전', '6일 전', '5일 전', '4일 전', '3일 전', '2일 전', '1일 전'],
-            // categories: dates,
         },
         title: {
             text: '심박수 / 혈중 산소 차트',
@@ -120,7 +106,6 @@ const PersonalInformation = () => {
         ],
         xaxis: {
             categories: ['7일 전', '6일 전', '5일 전', '4일 전', '3일 전', '2일 전', '1일 전'],
-            // categories: dates,
         },
         title: {
             text: '지수차트',
