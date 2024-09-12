@@ -233,7 +233,7 @@ const ProgressBar = styled.div`
 `;
 
 const ProgressSegment = styled.div<{ status: ConditionType; width: number }>`
-    width: ${props => Math.max(props.width, 1)}%;
+    width: ${props => Math.max(props.width, 2)}%;
     background-color: ${props => {
         switch (props.status) {
             case '양호': return '#3CB371';
