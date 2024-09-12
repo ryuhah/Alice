@@ -1,8 +1,7 @@
 import React, { useEffect, useState } from 'react'
 import styled from 'styled-components';
 import SearchBar from '../Search/SearchBar'
-import { IoIosArrowBack } from "react-icons/io";
-import { IoIosArrowForward } from "react-icons/io";
+import { IoIosArrowBack, IoIosArrowForward } from "react-icons/io";
 import { CSVLink } from "react-csv";
 import SortBtn from '../Search/SortBtn';
 import FilterBtn from '../Search/FilterBtn';
@@ -15,8 +14,6 @@ const Member = () => {
     const itemsPerPage= 10;
     const [selectedFilters, setSelectedFilters] = useState<string[]>([])
     const [searchTerm, setSearchTerm] = useState<string>('');
-
-
 
     useEffect(() => {
         const fatchMembers = async () => {
@@ -43,42 +40,22 @@ const Member = () => {
         setCurrentPage(1);
     };
 
-
-    // pagination
-    const indexOfLastItem = currentPage*itemsPerPage
-    const indexOfFirstItem = indexOfLastItem-itemsPerPage
-
     // sort
     const handleSortByName = (order : 'asc' | 'desc') => {
-        const sorted = [...members].sort((a, b) => {
-            if (order === 'asc') {
-                return a.member.name.localeCompare(b.member.name)
-            } else {
-                return b.member.name.localeCompare(a.member.name)
-            }
-        })
+        const sorted = [...members].sort((a, b) => order === 'asc'
+            ? a.member.name.localeCompare(b.member.name)
+            : b.member.name.localeCompare(a.member.name)
+        )
         setMembers(sorted)
         setCurrentPage(1);
     }
 
     // pagination
-    const currentItems = filteredMembers.slice(indexOfFirstItem, indexOfLastItem)
+    const currentItems = filteredMembers.slice((currentPage - 1) * itemsPerPage, currentPage * itemsPerPage);
 
-    const handlePageChange = (pageNumber : number) => {
-        setCurrentPage(pageNumber)
-    }
-
-    const handelNextPage =() => {
-        if (currentPage < Math.ceil(members.length / itemsPerPage)) {
-            setCurrentPage(currentPage+1)
-        }
-    }
-
-    const handlePrevPage = () => {
-        if (currentPage > 1) {
-            setCurrentPage(currentPage-1)
-        }
-    }
+    const handlePageChange = (pageNumber: number) => setCurrentPage(pageNumber);
+    const handleNextPage = () => currentPage < Math.ceil(members.length / itemsPerPage) && setCurrentPage(currentPage + 1);
+    const handlePrevPage = () => currentPage > 1 && setCurrentPage(currentPage - 1);
 
     const csvHeaders = [
         { label: "No.", key: "member.id" },
@@ -97,9 +74,9 @@ const Member = () => {
     const getFormattedDate = () => {
         const today = new Date();
         const year = today.getFullYear();
-        const month = String(today.getMonth() + 1).padStart(2, '0'); // 월은 0부터 시작하므로 +1
+        const month = String(today.getMonth() + 1).padStart(2, '0');
         const day = String(today.getDate()).padStart(2, '0');
-        return `${year}-${month}-${day}`; // 형식: YYYY-MM-DD
+        return `${year}-${month}-${day}`
     };
     
 
@@ -173,7 +150,7 @@ const Member = () => {
                     </PageBtn>
                 ))}
                 <PageBtn
-                    onClick={handelNextPage}
+                    onClick={handleNextPage}
                     disabled ={currentPage === Math.ceil(members.length / itemsPerPage)}>
                     <IoIosArrowForward />
                 </PageBtn>

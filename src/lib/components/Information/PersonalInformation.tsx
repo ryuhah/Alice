@@ -15,7 +15,6 @@ const PersonalInformation = () => {
     const [userCondition, setUserConditon] = useState<string | null>(null)
     const [chartData, setChartData] = useState<{ hr: number[]; spo2: number[] }>({ hr: [], spo2: [] });
     const [scoreChartData, setScoreChartData] = useState<{ wellness: number[]; physical: number[]; mental: number[] }>({ wellness: [], physical: [], mental: [] });
-    const [dates, setDates] = useState<string[]>([]); // 날짜 저장
 
     useEffect(() => {
         const fatchMember = async () => {
@@ -23,7 +22,6 @@ const PersonalInformation = () => {
                 // 개인 정보
                 const response = await instance.get(`/admin/members/info/detail/${no}`)
                 setUserInfo(response.data.memberDetail)
-                console.log("Result: " + JSON.stringify(response.data.memberDetail));
 
                 // 사용자 상태정보
                 const response2 = await instance.get('/admin/members/info/condition')
@@ -31,13 +29,11 @@ const PersonalInformation = () => {
                 
                 // 특정 회원의 상태 정보 필터링
                 const condition = memberConditions.find((item:any) => item.member.id.toString() === no)?.member.condition
-                console.log("사용자 상태 : " + JSON.stringify(condition))
                 setUserConditon(condition || null)
 
                 // 사용자 차트정보
                 const response3 = await instance.get(`/admin/members/info/chart/${no}`)
                 const memberCharts = response3.data.memberCharts;
-                console.log("사용자 차트 정보" + JSON.stringify(response3.data))
 
                 // 차트 데이터를 상태로 설정
                 setChartData({
@@ -57,7 +53,7 @@ const PersonalInformation = () => {
         }
 
         fatchMember()
-    },[no])
+    },[])
 
     if (!userInfo) {
         return <div>유저를 찾을 수 없습니다.</div>;

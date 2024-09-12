@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react'
-import styled from 'styled-components';
+import styled, { keyframes } from 'styled-components';
 import FilterBtn from '../Search/FilterBtn';
 import SearchBar from '../Search/SearchBar';
 import { Link } from 'react-router-dom';
@@ -86,33 +86,28 @@ const Information = () => {
 
     // sort
     const handleSortByName = (order : 'asc' | 'desc') => {
-        const sorted = [...filteredMembers].sort((a, b) => {
-            if (order === 'asc') {
-                return a.member.name.localeCompare(b.member.name)
-            } else {
-                return b.member.name.localeCompare(a.member.name)
-            }
-        })
+        const sorted = [...filteredMembers].sort((a, b) => 
+            order === 'asc'
+                ? a.member.name.localeCompare(b.member.name)
+                : b.member.name.localeCompare(a.member.name)
+        )
         setFilteredMembers(sorted)
     }
 
-    const conditionPriority:Record<ConditionType, number> = {
-        '미측정' : 4,
-        '위험' : 3,
-        '주의' : 2,
-        '양호' : 1
-    }
-
     const handleSortByCondition = (order : 'asc' | 'desc') => {
+
+        const conditionPriority:Record<ConditionType, number> = {
+            '미측정' : 4,
+            '위험' : 3,
+            '주의' : 2,
+            '양호' : 1
+        }
+
         const sorted = [...filteredMembers].sort((a, b) => {
             const priorityA = conditionPriority[a.member.condition as ConditionType] || 0
             const priorityB = conditionPriority[b.member.condition as ConditionType] || 0
 
-            if (order === 'asc') {
-                return priorityA - priorityB
-            } else {
-                return priorityB - priorityA
-            }
+            return order === 'asc' ? priorityA - priorityB : priorityB - priorityA;
         })
         setFilteredMembers(sorted)
     }
@@ -210,6 +205,14 @@ const Title = styled.h2`
     color : #245671;
     font-size : 26px;
 `
+const stripeAnimation = keyframes`
+  0% {
+    background-position: 0 0;
+  }
+  100% {
+    background-position: 40px 0;
+  }
+`;
 
 const ProgressBarContainer = styled.div`
     margin: 0;
@@ -230,21 +233,28 @@ const ProgressBar = styled.div`
 `;
 
 const ProgressSegment = styled.div<{ status: ConditionType; width: number }>`
-    width: ${props => props.width}%;
+    width: ${props => Math.max(props.width, 1)}%;
     background-color: ${props => {
         switch (props.status) {
-            case '양호':
-                return '#3CB371'; // 초록색
-            case '주의':
-                return '#FFA500'; // 주황색
-            case '위험':
-                return '#FF6347'; // 빨간색
-            case '미측정':
-                return '#A9A9A9'; // 회색
-            default:
-                return '#FFFFFF'; // 기본값 흰색
+            case '양호': return '#3CB371';
+            case '주의': return '#FFA500';
+            case '위험': return '#FF6347';
+            case '미측정': return '#A9A9A9';
+            default: return '#FFFFFF';
         }
     }};
+    background-image: linear-gradient(
+        45deg,
+        rgba(255, 255, 255, 0.2) 25%,
+        transparent 25%,
+        transparent 50%,
+        rgba(255, 255, 255, 0.2) 50%,
+        rgba(255, 255, 255, 0.2) 75%,
+        transparent 75%,
+        transparent
+    );
+    background-size: 40px 40px;
+    animation: ${stripeAnimation} 2s linear infinite;
     color: white;
     text-align: center;
     line-height: 20px;
