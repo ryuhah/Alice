@@ -72,6 +72,10 @@ const PersonalInformation =() => {
     }
 
     useEffect(() => {
+        console.log("현재 선택된 시간 단위:", timeUnit);
+    }, [timeUnit]);
+
+    useEffect(() => {
         const fatchMember = async () => {
             try {
                 // 개인 정보
