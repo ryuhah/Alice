@@ -21,6 +21,7 @@ const Member = () => {
                 const response = await instance.get('/admin/members/info/detail')
                 setMembers(response.data.memberDetails)
                 setFilteredMembers(response.data.memberDetails)
+                console.log("Loaded members data:", response.data.memberDetails);
             } catch (error) {
                 console.log("전체회원 상세정보 조회 실패 : "+ error)
             }

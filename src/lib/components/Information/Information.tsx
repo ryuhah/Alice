@@ -1,10 +1,11 @@
 import React, { useEffect, useState } from 'react'
-import styled, { keyframes } from 'styled-components';
+import styled, { css, keyframes } from 'styled-components';
 import FilterBtn from '../Search/FilterBtn';
 import SearchBar from '../Search/SearchBar';
-import { Link } from 'react-router-dom';
+import { Link, useLocation, useNavigate } from 'react-router-dom';
 import SortBtn from '../Search/SortBtn';
 import instance from '../../../axios';
+import { LuSiren } from "react-icons/lu";
 
 type ConditionType = '미측정' | '위험' | '주의' | '양호';
 
@@ -20,18 +21,49 @@ const Information = () => {
         양호: 0
     })
 
+    const addDummyData = (data : any[]) => {
+        const dummyData = [
+            {member:{
+                id:999,
+                loginId:"aaa",
+                name:"홍길동",
+                phoneNumber:"010-0000-0000",
+                supervisorPhoneNumber:"010-1111-1111",
+                gpsLocation:"위치없음",
+                condition: '위험'
+            },
+            vital:{
+                stress:0,
+                depress:2,
+                abnormalHr:0,
+                spo2:1,
+                hr:1,
+                step:21,
+                recovery:1
+            }}
+        ]
+        return[...data, ...dummyData]
+    }
+
     useEffect(() => {
         const fatchMembers = async () => {
             try{
                 // 전체 사용자 정보
                 const response = await instance.get('/admin/members/info/detail')
-                setMembers(response.data.memberDetails)
-                setFilteredMembers(response.data.memberDetails)
+                const updatedData = addDummyData(response.data.memberDetails)
+                // setMembers(response.data.memberDetails)
+                // setFilteredMembers(response.data.memberDetails)
+                setMembers(updatedData)
+                setFilteredMembers(updatedData)
+                console.log("사용자 정보 조회 성공 " + JSON.stringify(response.data.memberDetails));
 
                 // 사용자 상태정보
                 const response2 = await instance.get('/admin/members/info/condition')
-                setMembers(response2.data.memberConditions)
-                setFilteredMembers(response2.data.memberConditions)
+                // setMembers(response2.data.memberConditions)
+                // setFilteredMembers(response2.data.memberConditions)
+                setMembers(addDummyData(response2.data.memberConditions))
+                setFilteredMembers(addDummyData(response2.data.memberConditions))
+                console.log("사용자 정보 조회 성공 " + JSON.stringify(response2.data.memberConditions));
 
                 // 상태별 사용자 수 계산
                 calculateConditionCounts(response2.data.memberConditions)
@@ -61,8 +93,6 @@ const Information = () => {
         setConditionCounts(counts)
     }
 
-    // 총 사용자 수 계산
-    const totalMembers = members.length;
 
     // filter
     const handleSearch = () => {
@@ -112,11 +142,25 @@ const Information = () => {
         setFilteredMembers(sorted)
     }
 
-    
+    // 위험 사용자 필터링
+    const dangerousMembers = filteredMembers.filter(member => member.member.condition === '위험');
+
     return (
         <InformationContainer>
             <HeaderContainer>
                 <Title>사용자 건강상태</Title>
+                <DangerMembersBox>
+                    <StyledLuSiren danger={dangerousMembers.length > 0} />
+                    <DangerousMembersList danger={dangerousMembers.length > 0}>
+                        {dangerousMembers.map(member => (
+                            <DangerousMemberItem key={member.member.id}>
+                                <Link to={`/dashboard/${member.member.id}`}>{member.member.name}-산소포화도 낮음</Link>
+                            </DangerousMemberItem>
+                        ))}
+                    </DangerousMembersList>
+                </DangerMembersBox>
+                
+                <div style={{ flex: 1 }} />
                 <SearchBox>
                     <FilterBtn
                         selectedFilters={selectedFilters}
@@ -136,13 +180,15 @@ const Information = () => {
             </SortContainer>
 
             <ProgressBarContainer>
-                <ProgressText>전체 사용자 건강 상태 ({totalMembers}명)</ProgressText>
+                <ProgressText>전체 사용자 건강 상태 ({members.length}명)</ProgressText>
                 <ProgressBar>
-                    {Object.entries(conditionCounts).map(([key, value]) => (
+                    {Object.entries(conditionCounts)
+                        .filter(([key]) => key !== '미측정')
+                        .map(([key, value]) => (
                         <ProgressSegment
                             key={key}
                             status={key as ConditionType}
-                            width={(value / totalMembers) * 100}
+                            width={(value / members.length) * 100}
                         >
                             {value}명
                         </ProgressSegment>
@@ -170,6 +216,18 @@ const Information = () => {
 
 export default Information
 
+const blinkAnimation = keyframes`
+  0% {
+    border-color: '#FFFF00';
+  }
+  50% {
+    border-color: transparent;
+  }
+  100% {
+    border-color: '#FFFF00';
+  }
+`;
+
 interface UserCardProps {
     status: string;
 }
@@ -192,6 +250,43 @@ const SearchBox = styled.div`
     gap :10px;
 `
 
+const DangerMembersBox = styled.div`
+    display : flex;
+    justify-content : center;
+    align-items : center;
+    gap :20px;   
+`
+
+const StyledLuSiren = styled(LuSiren)<{ danger: boolean }>`
+    font-size: 34px;
+    color: ${props => (props.danger ? '#FF6347' : '#A9A9A9')}; /* 위험 사용자가 없으면 회색 */
+`;
+
+const DangerousMembersList = styled.div<{ danger: boolean }>`
+    width: 250px;
+    height: 50px;
+    overflow-y: auto;
+    display: block;
+    font-size: 16px;
+    color: black;
+    padding: 10px;
+    border-radius: 10px;
+    border: ${props => (props.danger ? '2px solid #70BFC9' : 'none')}; /* 위험 사용자가 없으면 border 제거 */
+    margin-top: 10px;
+`;
+
+const DangerousMemberItem = styled.div`
+    margin-bottom: 10px;
+    a {
+        text-decoration: none;
+        color: inherit; /* 링크 색상 상속 */
+    }
+
+    &:hover {
+        text-decoration: underline; /* 호버 시 밑줄 추가 */
+    }
+`;
+
 const SortContainer = styled.div`
     display : flex;
     justify-content : space-between;
@@ -204,6 +299,7 @@ const SortBtnBox = styled.div`
 const Title = styled.h2`
     color : #245671;
     font-size : 26px;
+    margin-right : 20px;
 `
 const stripeAnimation = keyframes`
   0% {
@@ -263,9 +359,9 @@ const ProgressSegment = styled.div<{ status: ConditionType; width: number }>`
 
 
 const ScrollContainer = styled.div`
-    height : 75.7%;
+    height : 75%;
     overflow-y : auto;
-    margin-top : 20px;
+    margin-top : 10px;
 `
 
 
@@ -273,7 +369,7 @@ const ScrollContainer = styled.div`
 const UserContainer = styled.div`
     display: grid;
     grid-template-columns: repeat(7, 1fr);
-    gap: 15px;
+    gap: 10px;
     padding-right : 10px;
     
 `
@@ -301,6 +397,11 @@ const UserCard = styled.div<UserCardProps>`
     }};
     color: white;
     text-align: center;
+
+    border: 5px solid ${props => (props.status === '위험' ? '#FFFF00' : 'transparent')};
+
+    /* 위급인 경우 border 깜빡이는 애니메이션 적용 */
+    animation: ${props => (props.status === '위험' ? css`${blinkAnimation} 1s infinite` : 'none')};
 `;
 
 const UserName = styled.div`

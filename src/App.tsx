@@ -12,6 +12,7 @@ const App : React.FC = () => {
       <Route path="/dashboard/:no" element={<PersonalInformation />} />
       <Route path ="/*" element = {<Layout />} />
     </Routes>
+    
   )
 }
 

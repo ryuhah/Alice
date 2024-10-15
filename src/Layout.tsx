@@ -10,17 +10,17 @@ import Information from './lib/components/Information/Information';
 const Layout = () => {
   return (
     <AppContainer>
-      <Header />
-      <MainContent>
-        <SideNav />
-        <Routes>
-            <Route path="/member" element={<Member />}></Route>
-            <Route path="/information" element={<Information />}></Route>
-        </Routes>
-      </MainContent>
-      <Bgimg />
-    </AppContainer>
-
+        <Header />
+        <MainContent>
+          <SideNav />
+          <Routes>
+              <Route path="/member" element={<Member />}></Route>
+              <Route path="/information" element={<Information />}></Route>
+          </Routes>
+        </MainContent>
+        <Bgimg />
+      </AppContainer> 
+  
   )
 }
 
