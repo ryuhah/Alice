@@ -1,5 +1,4 @@
 import React, { useEffect, useState } from 'react'
-import { useLocation, useNavigate } from 'react-router-dom'
 import styled from 'styled-components'
 import Header from '../Header/Header'
 import { useParams } from 'react-router-dom'
@@ -21,8 +20,6 @@ const PersonalInformation =() => {
     const [barChartXAxis, setBarChartXAxis] = useState<string[]>([]);
     
     const [timeUnit, setTimeUnit] = useState<'day' | 'hour' | 'minute'>('day');
-
-    const [isButtonDisabled, setIsButtonDisabled] = useState(false);
 
     const updateLineChartXAxis  = (unit : 'day' | 'hour' | 'minute') => {
         let categories : string[] =[];

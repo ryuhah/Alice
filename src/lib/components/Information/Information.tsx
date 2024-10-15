@@ -2,7 +2,7 @@ import React, { useEffect, useState } from 'react'
 import styled, { css, keyframes } from 'styled-components';
 import FilterBtn from '../Search/FilterBtn';
 import SearchBar from '../Search/SearchBar';
-import { Link, useLocation, useNavigate } from 'react-router-dom';
+import { Link } from 'react-router-dom';
 import SortBtn from '../Search/SortBtn';
 import instance from '../../../axios';
 import { LuSiren } from "react-icons/lu";
@@ -40,7 +40,7 @@ const Information = () => {
                 hr:1,
                 step:21,
                 recovery:1
-            }}
+            }} 
         ]
         return[...data, ...dummyData]
     }
