@@ -7,7 +7,14 @@ import SortBtn from '../Search/SortBtn';
 import instance from '../../../axios';
 import { LuSiren } from "react-icons/lu";
 
-type ConditionType = '미측정' | '위험' | '주의' | '양호';
+type ConditionType = 'NOT_MEASUREMENT' | 'DANGER' | 'CAUTION' | 'GOOD';
+
+const conditionLabels: Record<ConditionType, string> = {
+    NOT_MEASUREMENT: '미측정',
+    DANGER: '위험',
+    CAUTION: '주의',
+    GOOD: '양호',
+};
 
 const Information = () => {
     const [members, setMembers] = useState<any[]>([]);
@@ -15,10 +22,10 @@ const Information = () => {
     const [selectedFilters, setSelectedFilters] = useState<string[]>([])
     const [searchTerm, setSearchTerm] = useState<string>('');
     const [conditionCounts, setConditionCounts] = useState<Record<ConditionType, number>>({
-        미측정: 0,
-        위험: 0,
-        주의: 0,
-        양호: 0
+        NOT_MEASUREMENT: 0,
+        CAUTION: 0,
+        DANGER: 0,
+        GOOD: 0
     })
 
     const addDummyData = (data : any[]) => {
@@ -30,7 +37,7 @@ const Information = () => {
                 phoneNumber:"010-0000-0000",
                 supervisorPhoneNumber:"010-1111-1111",
                 gpsLocation:"위치없음",
-                condition: '위험'
+                condition: 'DANGER'
             },
             vital:{
                 stress:0,
@@ -77,10 +84,10 @@ const Information = () => {
     // progressbar
     const calculateConditionCounts = (membersData : any[]) => {
         const counts: Record<ConditionType, number> = {
-            미측정: 0,
-            위험: 0,
-            주의: 0,
-            양호: 0
+            NOT_MEASUREMENT: 0,
+            DANGER: 0,
+            CAUTION: 0,
+            GOOD: 0
         }
 
         membersData.forEach((member) => {
@@ -127,10 +134,10 @@ const Information = () => {
     const handleSortByCondition = (order : 'asc' | 'desc') => {
 
         const conditionPriority:Record<ConditionType, number> = {
-            '미측정' : 4,
-            '위험' : 3,
-            '주의' : 2,
-            '양호' : 1
+            'NOT_MEASUREMENT' : 0,
+            'DANGER' : 3,
+            'CAUTION' : 2,
+            'GOOD' : 1
         }
 
         const sorted = [...filteredMembers].sort((a, b) => {
@@ -143,7 +150,7 @@ const Information = () => {
     }
 
     // 위험 사용자 필터링
-    const dangerousMembers = filteredMembers.filter(member => member.member.condition === '위험');
+    const dangerousMembers = filteredMembers.filter(member => member.member.condition === 'DANGER');
 
     return (
         <InformationContainer>
@@ -183,7 +190,7 @@ const Information = () => {
                 <ProgressText>전체 사용자 건강 상태 ({members.length}명)</ProgressText>
                 <ProgressBar>
                     {Object.entries(conditionCounts)
-                        .filter(([key]) => key !== '미측정')
+                        .filter(([key]) => key !== 'NOT_MEASUREMENT')
                         .map(([key, value]) => (
                         <ProgressSegment
                             key={key}
@@ -202,7 +209,7 @@ const Information = () => {
                         <UserCard key={index} status={item.member.condition}>
                             <UserName>{item.member.name}</UserName>
                             <UserId>{item.member.loginId}</UserId>
-                            <Status>{item.member.condition}</Status>
+                            <Status>{conditionLabels[item.member.condition as ConditionType]}</Status>
                             <DetailButton as={Link} to={`/dashboard/${item.member.id}`}>상세정보</DetailButton>
                         </UserCard>
                     ))}
@@ -332,10 +339,10 @@ const ProgressSegment = styled.div<{ status: ConditionType; width: number }>`
     width: ${props => Math.max(props.width, 2)}%;
     background-color: ${props => {
         switch (props.status) {
-            case '양호': return '#3CB371';
-            case '주의': return '#FFA500';
-            case '위험': return '#FF6347';
-            case '미측정': return '#A9A9A9';
+            case 'GOOD': return '#3CB371';
+            case 'CAUTION': return '#FFA500';
+            case 'DANGER': return '#FF6347';
+            case 'NOT_MEASUREMENT': return '#A9A9A9';
             default: return '#FFFFFF';
         }
     }};
@@ -383,13 +390,13 @@ const UserCard = styled.div<UserCardProps>`
     border-radius: 8px;
     background-color: ${props => {
         switch (props.status) {
-            case '양호':
+            case 'GOOD':
                 return '#3CB371'; // 초록색
-            case '주의':
+            case 'CAUTION':
                 return '#FFA500'; // 주황색
-            case '위험':
+            case 'DANGER':
                 return '#FF6347'; // 빨간색
-            case '미측정':
+            case 'NOT_MEASUREMENT':
                 return '#A9A9A9'; // 회색
             default:
                 return '#FFFFFF'; // 기본값 흰색
@@ -398,10 +405,10 @@ const UserCard = styled.div<UserCardProps>`
     color: white;
     text-align: center;
 
-    border: 5px solid ${props => (props.status === '위험' ? '#FFFF00' : 'transparent')};
+    border: 5px solid ${props => (props.status === 'DANGER' ? '#FFFF00' : 'transparent')};
 
     /* 위급인 경우 border 깜빡이는 애니메이션 적용 */
-    animation: ${props => (props.status === '위험' ? css`${blinkAnimation} 1s infinite` : 'none')};
+    animation: ${props => (props.status === 'DANGER' ? css`${blinkAnimation} 1s infinite` : 'none')};
 `;
 
 const UserName = styled.div`

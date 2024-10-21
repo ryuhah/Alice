@@ -1,19 +1,73 @@
-export const dummyData = Array.from({ length: 50 }, (_, index) => ({
-    no: index + 1,
-    id: `user${index + 1}`,
-    name: `사용자${index + 1}`,
-    phone: `010-1234-567${index % 10}`,
-    location: `위치${index + 1}`,
-    stress: (Math.random() * 10).toFixed(0),
-    depression: (Math.random() * 10).toFixed(0),
-    heartEvent: `000`,
-    spo2: `${95 + (index % 5)}`,
-    hr: 60 + (index % 40),
-    step: 600 + (index % 40),
-    status: ['양호', '주의', '위험', '미측정'][index % 4],
-    date: `23.09.0${index % 10}`,
-    physicalHealth : (Math.random() * 10).toFixed(1),
-    mentalHealth : (Math.random() * 10).toFixed(1),
-    wellnessScore : (Math.random() * 10).toFixed(1),
-    recovery : (Math.random() * 10).toFixed(0)
-}));
+// dummyData.ts
+export const dummyData = [
+    {
+        member: {
+            id: 999,
+            loginId: "aaa",
+            name: "홍길동",
+            phoneNumber: "010-0000-0000",
+            supervisorPhoneNumber: "010-1111-1111",
+            gpsLocation: "위치없음",
+            condition: 'DANGER'
+        },
+        vital: {
+            stress: 0,
+            depress: 2,
+            abnormalHr: 0,
+            spo2: 1,
+            hr: 1,
+            step: 21,
+            recovery: 1
+        },
+        memberCharts: {
+            hr: [
+                {"value": 92, "Ts": "2024-10-21T17:33:56"},
+                {"value": 89, "Ts": "2024-10-21T17:40:03"},
+                {"value": 83, "Ts": "2024-10-21T17:50:36"},
+                {"value": 79, "Ts": "2024-10-21T17:56:30"},
+                {"value": 84, "Ts": "2024-10-21T18:02:17"},
+                {"value": 70, "Ts": "2024-10-21T18:08:05"},
+                {"value": 90, "Ts": "2024-10-21T18:13:57"},
+                {"value": 85, "Ts": "2024-10-21T18:19:41"},
+                {"value": 71, "Ts": "2024-10-21T18:30:15"},
+                {"value": 81, "Ts": "2024-10-21T18:36:00"},
+                {"value": 81, "Ts": "2024-10-21T18:42:04"},
+                {"value": 70, "Ts": "2024-10-21T18:47:57"},
+                {"value": 86, "Ts": "2024-10-21T18:54:24"},
+                {"value": 91, "Ts": "2024-10-21T19:00:58"},
+                {"value": 82, "Ts": "2024-10-21T19:06:57"},
+                {"value": 57, "Ts": "2024-10-21T19:12:42"},
+                {"value": 83, "Ts": "2024-10-21T19:18:36"},
+                {"value": 79, "Ts": "2024-10-21T19:24:31"},
+                {"value": 73, "Ts": "2024-10-21T19:31:25"},
+                {"value": 83, "Ts": "2024-10-21T19:46:38"}
+            ],
+            spo2: [
+                {"value": 1, "Ts": "2024-10-21T17:34:03"},
+                {"value": 1, "Ts": "2024-10-21T17:40:14"},
+                {"value": 1, "Ts": "2024-10-21T17:50:45"},
+                {"value": 1, "Ts": "2024-10-21T17:56:42"},
+                {"value": 1, "Ts": "2024-10-21T18:02:25"},
+                {"value": 1, "Ts": "2024-10-21T18:08:20"},
+                {"value": 1, "Ts": "2024-10-21T18:14:06"},
+                {"value": 98, "Ts": "2024-10-21T18:20:06"},
+                {"value": 1, "Ts": "2024-10-21T18:30:22"},
+                {"value": 81, "Ts": "2024-10-21T18:36:14"},
+                {"value": 1, "Ts": "2024-10-21T18:42:11"},
+                {"value": 97, "Ts": "2024-10-21T18:48:22"},
+                {"value": 1, "Ts": "2024-10-21T18:54:49"},
+                {"value": 1, "Ts": "2024-10-21T19:01:11"},
+                {"value": 1, "Ts": "2024-10-21T19:07:06"},
+                {"value": 1, "Ts": "2024-10-21T19:12:55"},
+                {"value": 1, "Ts": "2024-10-21T19:18:47"},
+                {"value": 1, "Ts": "2024-10-21T19:31:32"},
+                {"value": 1, "Ts": "2024-10-21T19:46:45"}
+            ],
+            wellness: [],
+            physical: [],
+            mental: [
+                {"score": -1, "Ts": "2024-10-21T16:31:02"}
+            ]
+        }
+    }
+];

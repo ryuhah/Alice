@@ -8,6 +8,34 @@ import instance from '../../../axios'
 import ReactApexChart from 'react-apexcharts'
 import { ApexOptions } from 'apexcharts'
 
+const dummyData = {
+    member: {
+        id: 999,
+        loginId: "aaa",
+        name: "홍길동",
+        phoneNumber: "010-0000-0000",
+        supervisorPhoneNumber: "010-1111-1111",
+        gpsLocation: "위치없음",
+        condition: 'DANGER'
+    },
+    vital: {
+        stress: 0,
+        depress: 2,
+        abnormalHr: 0,
+        spo2: 1,
+        hr: 1,
+        step: 21,
+        recovery: 1
+    }
+};
+
+const conditionLabels: Record<string, string> = {
+    NOT_MEASUREMENT: '미측정',
+    DANGER: '위험',
+    CAUTION: '주의',
+    GOOD: '양호',
+};
+
 const PersonalInformation =() => {
     const { no } = useParams<{ no: string }>();
     const [userInfo, setUserInfo] = useState<any | null>(null)
@@ -17,9 +45,13 @@ const PersonalInformation =() => {
     
     
     const [lineChartXAxis, setLineChartXAxis] = useState<string[]>([]);
-    const [barChartXAxis, setBarChartXAxis] = useState<string[]>([]);
+    const [lineChartXAxis2, setLineChartXAxis2] = useState<string[]>([]);
     
     const [timeUnit, setTimeUnit] = useState<'day' | 'hour' | 'minute'>('day');
+
+    const [buttonDisabled, setButtonDisabled] = useState(userCondition !== 'GOOD');
+
+    const date = new Date().toISOString().split('T')[0];
 
     const updateLineChartXAxis  = (unit : 'day' | 'hour' | 'minute') => {
         let categories : string[] =[];
@@ -67,13 +99,21 @@ const PersonalInformation =() => {
             }
         }
 
-        setBarChartXAxis(categories);
+        setLineChartXAxis2(categories);
         setTimeUnit(unit);
     }
 
     useEffect(() => {
         console.log("현재 선택된 시간 단위:", timeUnit);
     }, [timeUnit]);
+
+    useEffect(() => {
+        if (userCondition === 'DANGER') {
+            setButtonDisabled(false); // 상태가 위험일 때 버튼 활성화
+        } else {
+            setButtonDisabled(true); // 다른 상태일 때 버튼 비활성화
+        }
+    }, [userCondition]);
 
     useEffect(() => {
         const fatchMember = async () => {
@@ -93,7 +133,9 @@ const PersonalInformation =() => {
                 console.log("사용자 상태 : " + JSON.stringify(condition))
 
                 // 사용자 차트정보
-                const response3 = await instance.get(`/admin/members/info/chart/${no}`)
+                const response3 = await instance.get(`/admin/members/info/chart/${no}`,{
+                    params : {date}
+                })
                 const memberCharts = response3.data.memberCharts;
                 console.log("사용자 차트 정보" + JSON.stringify(response3.data))
 
@@ -114,6 +156,9 @@ const PersonalInformation =() => {
   
             } catch (error) {
                 console.log("데이터 조회 실패" + error)
+
+                setUserInfo(dummyData);
+                setUserConditon(dummyData.member.condition);
 
                 setChartData({
                     hr: [70, 75, 72, 71, 73, 74, 76], // 임시 심박수 데이터
@@ -151,6 +196,7 @@ const PersonalInformation =() => {
         ],
         stroke: {
             curve: 'smooth',
+            width:2
         },
         xaxis: {
             // categories: ['7일 전', '6일 전', '5일 전', '4일 전', '3일 전', '2일 전', '1일 전'],
@@ -169,9 +215,7 @@ const PersonalInformation =() => {
     // score 차트 옵션 설정
     const stackedChartOptions: ApexOptions = {
         chart: {
-            type: 'bar',
-            stacked: true,
-            width: '50%',
+            type: 'line',
             height: 350,
             toolbar: { show: false }
         },
@@ -180,35 +224,35 @@ const PersonalInformation =() => {
             { name: '신체건강 지수', data: scoreChartData.physical },
             { name: '정신건강 지수', data: scoreChartData.mental }
         ],
+        stroke: {
+            curve: 'smooth',
+            width:2
+        },
         xaxis: {
-            // categories: ['7일 전', '6일 전', '5일 전', '4일 전', '3일 전', '2일 전', '1일 전'],
-            categories : barChartXAxis ,
-            tickAmount : 10,
-            
+            categories: lineChartXAxis2,
+            tickAmount: 10,
         },
         title: {
             text: '지수차트',
             align: 'left',
             style: {
-                fontSize:'20px'
+                fontSize: '20px'
             }
         },
         colors: ['#B5E6BE', '#70BFC9', '#B1DFDC'],
-        plotOptions: {
-            bar: {
-                horizontal: false,
-                columnWidth: '55%',
-            },
-        },
-        dataLabels : {
-            enabled : false
-        },
         legend: {
             position: 'bottom'
         }
     };
 
-    
+   
+
+    const handleConfirmClick = () => {
+        const userConfirmed = window.confirm('상태를 확인하시겠습니까?');
+        if (userConfirmed) {
+            setButtonDisabled(true);
+        }
+    };
 
     return (
         <DashboardContainer>
@@ -225,7 +269,13 @@ const PersonalInformation =() => {
             
             <TitleStatusBox>
                 <DetailTitle>{userInfo.member.name}님의 상세정보</DetailTitle>
-                {userCondition && <Status status={userCondition}>{userCondition}</Status>}
+                {userCondition && <Status status={userCondition}>{conditionLabels[userCondition] || '미측정'}</Status>}
+                <ConfirmButton
+                onClick={handleConfirmClick}
+                disabled={buttonDisabled}
+            >
+                상태 확인
+            </ConfirmButton>
             </TitleStatusBox>
 
             <InfoGrid>
@@ -261,7 +311,7 @@ const PersonalInformation =() => {
                                 <IconBack />
                                 <IconFront style={{backgroundImage : `url('/icon/physicalHealth.svg')`}}/>
                             </IconCircle>
-                            <Measure>{userInfo.score.physical}</Measure>
+                            <Measure>{userInfo?.score?.physical || '5'}</Measure>
                         </MeasureBack>
                         <MeasureTitle>신체건강 지수</MeasureTitle>
                     </MeasureBox>
@@ -299,7 +349,7 @@ const PersonalInformation =() => {
                             <IconBack />
                             <IconFront style={{backgroundImage : `url('/icon/mentalHealth.svg')`}}/>
                         </IconCircle>
-                        <Measure>{userInfo.score.mental}</Measure>
+                        <Measure>{userInfo?.score?.mental ||'5'}</Measure>
                     </MeasureBack>
                     <MeasureTitle>정신건강 지수</MeasureTitle>
                 </MeasureBox>
@@ -342,7 +392,7 @@ const PersonalInformation =() => {
                     <WellnessCircleFront />
                     <WellnessFlex>
                         <MeasureTitle>웰니스 지수</MeasureTitle>
-                        <WellnessMeasure>{userInfo.score.wellness}</WellnessMeasure>
+                        <WellnessMeasure>{userInfo?.score?.wellness||'5'}</WellnessMeasure>
                     </WellnessFlex>
                 </WellnessCircle>
             </MeasurementIndexContainer>
@@ -366,7 +416,7 @@ const PersonalInformation =() => {
                         <TimeButton onClick={() => updateBarChartXAxis('minute')}>분</TimeButton>
                     </ButtonContainer>
                     <ChartWrapper>
-                        <ReactApexChart options={stackedChartOptions} series={stackedChartOptions.series} type="bar" height={350} />
+                        <ReactApexChart options={stackedChartOptions} series={stackedChartOptions.series} type="line" height={350} />
                     </ChartWrapper>
                 </ChartDiv>
             </ChartContainer>
@@ -454,19 +504,32 @@ const Status = styled.div<UserStatusProps>`
     border-radius : 20px;
     background-color: ${props => {
         switch (props.status) {
-            case '양호':
+            case 'GOOD':
                 return '#3CB371';
-            case '주의':
+            case 'CAUTION':
                 return '#FFA500';
-            case '위험':
+            case 'DANGER':
                 return '#FF6347';
-            case '미측정':
+            case 'NOT_MEASUREMENT':
                 return '#A9A9A9';
             default:
                 return '#FFFFFF';
         }
     }};
 `
+
+const ConfirmButton = styled.button`
+    padding: 10px 20px;
+    font-size: 14px;
+    background-color: ${(props) => (props.disabled ? '#CCCCCC' : '#70BFC9')};
+    color: white;
+    border: none;
+    border-radius: 10px;
+    cursor: pointer
+    &:hover {
+        background-color: ${(props) => (props.disabled ? '#CCCCCC' : '#B1DFDC')};
+    }
+`;
 
 const InfoGrid = styled.div`
     width : 70%;
