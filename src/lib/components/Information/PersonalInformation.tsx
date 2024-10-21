@@ -400,9 +400,9 @@ const PersonalInformation =() => {
             <ChartContainer>
                 <ChartDiv>
                     <ButtonContainer>
-                        <TimeButton >일</TimeButton>
-                        <TimeButton >시</TimeButton>
-                        <TimeButton >분</TimeButton>
+                        <TimeButton onClick={() => updateLineChartXAxis('day', chartData.hr)}>일</TimeButton>
+                        <TimeButton onClick={() => updateLineChartXAxis('hour', chartData.hr)}>시</TimeButton>
+                        <TimeButton onClick={() => updateLineChartXAxis('minute', chartData.hr)}>분</TimeButton>
                     </ButtonContainer>
                     <ChartWrapper>
                         <ReactApexChart options={chartOptions} series={chartOptions.series} type="line" height={350} />
@@ -410,9 +410,9 @@ const PersonalInformation =() => {
                 </ChartDiv>
                 <ChartDiv>
                     <ButtonContainer>
-                        <TimeButton >일</TimeButton>
-                        <TimeButton >시</TimeButton>
-                        <TimeButton >분</TimeButton>
+                        <TimeButton onClick={() => updateBarChartXAxis('day', scoreChartData.wellness)}>일</TimeButton>
+                        <TimeButton onClick={() => updateBarChartXAxis('hour', scoreChartData.wellness)}>시</TimeButton>
+                        <TimeButton onClick={() => updateBarChartXAxis('minute', scoreChartData.wellness)}>분</TimeButton>
                     </ButtonContainer>
                     <ChartWrapper>
                         <ReactApexChart options={stackedChartOptions} series={stackedChartOptions.series} type="line" height={350} />
