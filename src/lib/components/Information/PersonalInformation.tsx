@@ -49,54 +49,58 @@ const PersonalInformation =() => {
     
     const [timeUnit, setTimeUnit] = useState<'day' | 'hour' | 'minute'>('day');
 
-    const [buttonDisabled, setButtonDisabled] = useState(userCondition !== 'GOOD');
+    const [buttonDisabled, setButtonDisabled] = useState(userCondition !== 'DANGER');
 
     const date = new Date().toISOString().split('T')[0];
 
-    const updateLineChartXAxis  = (unit : 'day' | 'hour' | 'minute') => {
-        let categories : string[] =[];
-        const now = new Date();
+    const updateLineChartXAxis = (unit: 'day' | 'hour' | 'minute', data: any[]) => {
+        let categories: string[] = [];
+        const maxPoints = 10;
+        const length = data.length;
+        const step = Math.ceil(length / maxPoints);
 
         if (unit === 'day') {
-            for (let i = 6; i >= 0; i--) {
-                const date = new Date(now.getFullYear(), now.getMonth(), now.getDate() - i);
-                categories.push(`${date.getMonth() + 1}/${date.getDate()}`);
-            }
+            categories = data.filter((_, index) => index % step === 0).map(item => {
+                const date = new Date(item.Ts);
+                return `${date.getMonth() + 1}/${date.getDate()}`;
+            });
         } else if (unit === 'hour') {
-            for (let i = 23; i >= 0; i--) {
-                const date = new Date(now.getTime() - i * 60 * 60 * 1000);
-                categories.push(`${date.getHours()}시`);
-            }
+            categories = data.filter((_, index) => index % step === 0).map(item => {
+                const date = new Date(item.Ts);
+                return `${date.getHours()}시`;
+            });
         } else if (unit === 'minute') {
-            for (let i = 59; i >= 0; i--) {
-                const date = new Date(now.getTime() - i * 60 * 1000);
-                categories.push(`${date.getHours()}:${date.getMinutes()}분`);
-            }
+            categories = data.filter((_, index) => index % step === 0).map(item => {
+                const date = new Date(item.Ts);
+                return `${date.getHours()}:${date.getMinutes()}분`;
+            });
         }
 
         setLineChartXAxis(categories);
         setTimeUnit(unit);
     }
 
-    const updateBarChartXAxis   = (unit : 'day' | 'hour' | 'minute') => {
-        let categories : string[] =[];
-        const now = new Date();
+    const updateBarChartXAxis = (unit: 'day' | 'hour' | 'minute', data: any[]) => {
+        let categories: string[] = [];
+        const maxPoints = 10;
+        const length = data.length;
+        const step = Math.ceil(length / maxPoints);
 
         if (unit === 'day') {
-            for (let i = 6; i >= 0; i--) {
-                const date = new Date(now.getFullYear(), now.getMonth(), now.getDate() - i);
-                categories.push(`${date.getMonth() + 1}/${date.getDate()}`);
-            }
+            categories = data.filter((_, index) => index % step === 0).map(item => {
+                const date = new Date(item.Ts);
+                return `${date.getMonth() + 1}/${date.getDate()}`;
+            });
         } else if (unit === 'hour') {
-            for (let i = 23; i >= 0; i--) {
-                const date = new Date(now.getTime() - i * 60 * 60 * 1000);
-                categories.push(`${date.getHours()}시`);
-            }
+            categories = data.filter((_, index) => index % step === 0).map(item => {
+                const date = new Date(item.Ts);
+                return `${date.getHours()}시`;
+            });
         } else if (unit === 'minute') {
-            for (let i = 59; i >= 0; i--) {
-                const date = new Date(now.getTime() - i * 60 * 1000);
-                categories.push(`${date.getHours()}:${date.getMinutes()}분`);
-            }
+            categories = data.filter((_, index) => index % step === 0).map(item => {
+                const date = new Date(item.Ts);
+                return `${date.getHours()}:${date.getMinutes()}분`;
+            });
         }
 
         setLineChartXAxis2(categories);
@@ -150,9 +154,6 @@ const PersonalInformation =() => {
                     physical: memberCharts.physical.map((item: any) => item.score),
                     mental: memberCharts.mental.map((item: any) => item.score),
                 });
-
-                updateLineChartXAxis('day');
-                updateBarChartXAxis('day');
   
             } catch (error) {
                 console.log("데이터 조회 실패" + error)
@@ -171,8 +172,6 @@ const PersonalInformation =() => {
                     mental: [90, 88, 89, 91, 92, 93, 94],  // 임시 정신 지수
                 });
 
-                updateLineChartXAxis('day');
-                updateBarChartXAxis('day');
             }
         }
 
@@ -401,9 +400,9 @@ const PersonalInformation =() => {
             <ChartContainer>
                 <ChartDiv>
                     <ButtonContainer>
-                        <TimeButton onClick={() => updateLineChartXAxis('day')}>일</TimeButton>
-                        <TimeButton onClick={() => updateLineChartXAxis('hour')}>시</TimeButton>
-                        <TimeButton onClick={() => updateLineChartXAxis('minute')}>분</TimeButton>
+                        <TimeButton >일</TimeButton>
+                        <TimeButton >시</TimeButton>
+                        <TimeButton >분</TimeButton>
                     </ButtonContainer>
                     <ChartWrapper>
                         <ReactApexChart options={chartOptions} series={chartOptions.series} type="line" height={350} />
@@ -411,9 +410,9 @@ const PersonalInformation =() => {
                 </ChartDiv>
                 <ChartDiv>
                     <ButtonContainer>
-                        <TimeButton onClick={() => updateBarChartXAxis('day')}>일</TimeButton>
-                        <TimeButton onClick={() => updateBarChartXAxis('hour')}>시</TimeButton>
-                        <TimeButton onClick={() => updateBarChartXAxis('minute')}>분</TimeButton>
+                        <TimeButton >일</TimeButton>
+                        <TimeButton >시</TimeButton>
+                        <TimeButton >분</TimeButton>
                     </ButtonContainer>
                     <ChartWrapper>
                         <ReactApexChart options={stackedChartOptions} series={stackedChartOptions.series} type="line" height={350} />
