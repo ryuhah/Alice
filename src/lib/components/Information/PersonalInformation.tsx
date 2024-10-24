@@ -40,76 +40,13 @@ const PersonalInformation =() => {
     const { no } = useParams<{ no: string }>();
     const [userInfo, setUserInfo] = useState<any | null>(null)
     const [userCondition, setUserConditon] = useState<string | null>(null)
-    const [chartData, setChartData] = useState<{ hr: number[]; spo2: number[] }>({ hr: [], spo2: [] });
-    const [scoreChartData, setScoreChartData] = useState<{ wellness: number[]; physical: number[]; mental: number[] }>({ wellness: [], physical: [], mental: [] });
-    
-    
-    const [lineChartXAxis, setLineChartXAxis] = useState<string[]>([]);
-    const [lineChartXAxis2, setLineChartXAxis2] = useState<string[]>([]);
-    
-    const [timeUnit, setTimeUnit] = useState<'day' | 'hour' | 'minute'>('day');
-
+    const [chartData, setChartData] = useState<{ hr: { value: number; Ts: string }[]; spo2: { value: number; Ts: string }[] }>({ hr: [], spo2: [] });
+    const [scoreChartData, setScoreChartData] = useState<{ wellness: {score: number; Ts: string}[]; physical: {score: number; Ts: string}[]; mental: {score: number; Ts: string}[] }>({ wellness: [], physical: [], mental: [] });
+    const [selectedTimeFrame, setSelectedTimeFrame] = useState<'day' | 'hour' | 'minute'>('day');
+    const [scoreSelectedTimeFrame, setScoreSelectedTimeFrame] = useState<'day' | 'hour' | 'minute'>('day');
     const [buttonDisabled, setButtonDisabled] = useState(userCondition !== 'DANGER');
 
     const date = new Date().toISOString().split('T')[0];
-
-    const updateLineChartXAxis = (unit: 'day' | 'hour' | 'minute', data: any[]) => {
-        let categories: string[] = [];
-        const maxPoints = 10;
-        const length = data.length;
-        const step = Math.ceil(length / maxPoints);
-
-        if (unit === 'day') {
-            categories = data.filter((_, index) => index % step === 0).map(item => {
-                const date = new Date(item.Ts);
-                return `${date.getMonth() + 1}/${date.getDate()}`;
-            });
-        } else if (unit === 'hour') {
-            categories = data.filter((_, index) => index % step === 0).map(item => {
-                const date = new Date(item.Ts);
-                return `${date.getHours()}시`;
-            });
-        } else if (unit === 'minute') {
-            categories = data.filter((_, index) => index % step === 0).map(item => {
-                const date = new Date(item.Ts);
-                return `${date.getHours()}:${date.getMinutes()}분`;
-            });
-        }
-
-        setLineChartXAxis(categories);
-        setTimeUnit(unit);
-    }
-
-    const updateBarChartXAxis = (unit: 'day' | 'hour' | 'minute', data: any[]) => {
-        let categories: string[] = [];
-        const maxPoints = 10;
-        const length = data.length;
-        const step = Math.ceil(length / maxPoints);
-
-        if (unit === 'day') {
-            categories = data.filter((_, index) => index % step === 0).map(item => {
-                const date = new Date(item.Ts);
-                return `${date.getMonth() + 1}/${date.getDate()}`;
-            });
-        } else if (unit === 'hour') {
-            categories = data.filter((_, index) => index % step === 0).map(item => {
-                const date = new Date(item.Ts);
-                return `${date.getHours()}시`;
-            });
-        } else if (unit === 'minute') {
-            categories = data.filter((_, index) => index % step === 0).map(item => {
-                const date = new Date(item.Ts);
-                return `${date.getHours()}:${date.getMinutes()}분`;
-            });
-        }
-
-        setLineChartXAxis2(categories);
-        setTimeUnit(unit);
-    }
-
-    useEffect(() => {
-        console.log("현재 선택된 시간 단위:", timeUnit);
-    }, [timeUnit]);
 
     useEffect(() => {
         if (userCondition === 'DANGER') {
@@ -145,31 +82,74 @@ const PersonalInformation =() => {
 
                 // 차트 데이터를 상태로 설정
                 setChartData({
-                    hr: memberCharts.hr.map((item: any) => item.value),
-                    spo2: memberCharts.spo2.map((item: any) => item.value),
+                    hr: memberCharts.hr.map((item: any) => ({ value: item.value, Ts: item.Ts })),
+                    spo2: memberCharts.spo2.map((item: any) => ({ value: item.value, Ts: item.Ts })),
                 });
         
                 setScoreChartData({
-                    wellness: memberCharts.wellness.map((item: any) => item.score),
-                    physical: memberCharts.physical.map((item: any) => item.score),
-                    mental: memberCharts.mental.map((item: any) => item.score),
+                    wellness: memberCharts.wellness.map((item: any) => ({ score: item.score, Ts: item.Ts })),
+                    physical: memberCharts.physical.map((item: any) => ({ score: item.score, Ts: item.Ts })),
+                    mental: memberCharts.mental.map((item: any) => ({ score: item.score, Ts: item.Ts })),
                 });
-  
+
             } catch (error) {
                 console.log("데이터 조회 실패" + error)
 
                 setUserInfo(dummyData);
                 setUserConditon(dummyData.member.condition);
 
+                const dummyTime = new Date().toISOString();
+
+                // 임시 차트 데이터 설정
                 setChartData({
-                    hr: [70, 75, 72, 71, 73, 74, 76], // 임시 심박수 데이터
-                    spo2: [98, 97, 99, 98, 96, 95, 94], // 임시 SpO2 데이터
+                    hr: [
+                        { value: 70, Ts: dummyTime },
+                        { value: 75, Ts: dummyTime },
+                        { value: 72, Ts: dummyTime },
+                        { value: 71, Ts: dummyTime },
+                        { value: 73, Ts: dummyTime },
+                        { value: 74, Ts: dummyTime },
+                        { value: 76, Ts: dummyTime }
+                    ],
+                    spo2: [
+                        { value: 98, Ts: dummyTime },
+                        { value: 97, Ts: dummyTime },
+                        { value: 99, Ts: dummyTime },
+                        { value: 98, Ts: dummyTime },
+                        { value: 96, Ts: dummyTime },
+                        { value: 95, Ts: dummyTime },
+                        { value: 94, Ts: dummyTime }
+                    ],
                 });
 
                 setScoreChartData({
-                    wellness: [70, 72, 74, 76, 75, 77, 73], // 임시 웰니스 지수
-                    physical: [80, 82, 81, 83, 85, 86, 84], // 임시 신체 지수
-                    mental: [90, 88, 89, 91, 92, 93, 94],  // 임시 정신 지수
+                    wellness: [
+                        { score: 70, Ts: dummyTime },
+                        { score: 72, Ts: dummyTime },
+                        { score: 74, Ts: dummyTime },
+                        { score: 76, Ts: dummyTime },
+                        { score: 75, Ts: dummyTime },
+                        { score: 77, Ts: dummyTime },
+                        { score: 73, Ts: dummyTime }
+                    ],
+                    physical: [
+                        { score: 80, Ts: dummyTime },
+                        { score: 82, Ts: dummyTime },
+                        { score: 81, Ts: dummyTime },
+                        { score: 83, Ts: dummyTime },
+                        { score: 85, Ts: dummyTime },
+                        { score: 86, Ts: dummyTime },
+                        { score: 84, Ts: dummyTime }
+                    ],
+                    mental: [
+                        { score: 90, Ts: dummyTime },
+                        { score: 88, Ts: dummyTime },
+                        { score: 89, Ts: dummyTime },
+                        { score: 91, Ts: dummyTime },
+                        { score: 92, Ts: dummyTime },
+                        { score: 93, Ts: dummyTime },
+                        { score: 94, Ts: dummyTime }
+                    ],
                 });
 
             }
@@ -177,6 +157,30 @@ const PersonalInformation =() => {
 
         fatchMember()
     },[no, date])
+
+    const handleTimeFrameChange = (timeFrame: 'day' | 'hour' | 'minute') => {
+        setSelectedTimeFrame(timeFrame);
+    };
+    const handleScoreTimeFrameChange = (timeFrame: 'day' | 'hour' | 'minute') => {
+        setScoreSelectedTimeFrame(timeFrame);
+    };
+
+    // x축 레이블 설정 함수
+    const getXaxisCategories = (data: { Ts: string }[], timeFrame: 'day' | 'hour' | 'minute') => {
+        return data.map((item) => {
+            const date = new Date(item.Ts);
+            if (timeFrame === 'day') {
+                // 월/일 형식
+                return `${date.getMonth() + 1}/${date.getDate()}`;
+            } else if (timeFrame === 'hour') {
+                // 일 시 형식
+                return `${date.getDate()}일 ${date.getHours()}시`;
+            } else if (timeFrame === 'minute') {
+                // 일 시 분 형식
+                return `${date.getDate()}일 ${date.getHours()}시 ${date.getMinutes()}분`;
+            }
+        });
+    };
     
     if (!userInfo) {
         return <div>유저를 찾을 수 없습니다.</div>;
@@ -190,8 +194,8 @@ const PersonalInformation =() => {
             toolbar: { show: false },
         },
         series: [
-            { name: '심박수', data: chartData.hr },
-            { name: 'SpO2', data: chartData.spo2 }
+            { name: '심박수', data: chartData.hr.map((item) => item.value) },
+            { name: 'SpO2', data: chartData.spo2.map((item) => item.value) }
         ],
         stroke: {
             curve: 'smooth',
@@ -199,7 +203,7 @@ const PersonalInformation =() => {
         },
         xaxis: {
             // categories: ['7일 전', '6일 전', '5일 전', '4일 전', '3일 전', '2일 전', '1일 전'],
-            categories : lineChartXAxis ,
+            categories: getXaxisCategories(chartData.hr, selectedTimeFrame)
         },
         title: {
             text: '심박수 / 혈중 산소 차트',
@@ -219,17 +223,17 @@ const PersonalInformation =() => {
             toolbar: { show: false }
         },
         series: [
-            { name: '웰니스 지수', data: scoreChartData.wellness },
-            { name: '신체건강 지수', data: scoreChartData.physical },
-            { name: '정신건강 지수', data: scoreChartData.mental }
+            { name: '웰니스 지수', data: scoreChartData.wellness.map((item) => item.score) },
+            { name: '신체건강 지수', data: scoreChartData.physical.map((item) => item.score) },
+            { name: '정신건강 지수', data: scoreChartData.mental.map((item) => item.score) }
         ],
         stroke: {
             curve: 'smooth',
             width:2
         },
         xaxis: {
-            categories: lineChartXAxis2,
-            tickAmount: 10,
+            // categories: ['7일 전', '6일 전', '5일 전', '4일 전', '3일 전', '2일 전', '1일 전'],
+            categories: getXaxisCategories(scoreChartData.physical, scoreSelectedTimeFrame)
         },
         title: {
             text: '지수차트',
@@ -400,9 +404,9 @@ const PersonalInformation =() => {
             <ChartContainer>
                 <ChartDiv>
                     <ButtonContainer>
-                        <TimeButton onClick={() => updateLineChartXAxis('day', chartData.hr)}>일</TimeButton>
-                        <TimeButton onClick={() => updateLineChartXAxis('hour', chartData.hr)}>시</TimeButton>
-                        <TimeButton onClick={() => updateLineChartXAxis('minute', chartData.hr)}>분</TimeButton>
+                        <TimeButton onClick={() => handleTimeFrameChange('day')}>일</TimeButton>
+                        <TimeButton onClick={() => handleTimeFrameChange('hour')}>시</TimeButton>
+                        <TimeButton onClick={() => handleTimeFrameChange('minute')}>분</TimeButton>
                     </ButtonContainer>
                     <ChartWrapper>
                         <ReactApexChart options={chartOptions} series={chartOptions.series} type="line" height={350} />
@@ -410,9 +414,9 @@ const PersonalInformation =() => {
                 </ChartDiv>
                 <ChartDiv>
                     <ButtonContainer>
-                        <TimeButton onClick={() => updateBarChartXAxis('day', scoreChartData.wellness)}>일</TimeButton>
-                        <TimeButton onClick={() => updateBarChartXAxis('hour', scoreChartData.wellness)}>시</TimeButton>
-                        <TimeButton onClick={() => updateBarChartXAxis('minute', scoreChartData.wellness)}>분</TimeButton>
+                        <TimeButton onClick={() => handleScoreTimeFrameChange('day')}>일</TimeButton>
+                        <TimeButton onClick={() => handleScoreTimeFrameChange('hour')}>시</TimeButton>
+                        <TimeButton onClick={() => handleScoreTimeFrameChange('minute')}>분</TimeButton>
                     </ButtonContainer>
                     <ChartWrapper>
                         <ReactApexChart options={stackedChartOptions} series={stackedChartOptions.series} type="line" height={350} />
