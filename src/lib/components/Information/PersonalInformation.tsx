@@ -179,6 +179,7 @@ const PersonalInformation =() => {
                 // 일 시 분 형식
                 return `${date.getDate()}일 ${date.getHours()}시 ${date.getMinutes()}분`;
             }
+            return '';
         });
     };
     
