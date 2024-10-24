@@ -9,6 +9,17 @@ const instance = axios.create({
 
 });
 
+instance.interceptors.response.use(
+    (response) => response,
+    (error) => {
+      if (error.response && error.response.status === 401) {
+        alert("토큰이 만료되었습니다. 다시 로그인해주세요");
+        window.location.replace('/login')
+      }
+      return Promise.reject(error)
+    }
+  )
+
 export const setHeader = (token: string | null) => {
     if (token) {
         instance.defaults.headers.common["Authorization"] = `Bearer ${token}`;
