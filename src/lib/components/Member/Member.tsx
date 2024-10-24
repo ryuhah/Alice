@@ -42,20 +42,20 @@ const Member = () => {
     };
 
     // sort
-    const handleSortByName = (order : 'asc' | 'desc') => {
-        const sorted = [...members].sort((a, b) => order === 'asc'
+    const handleSortByName = (order: 'asc' | 'desc') => {
+        const sorted = [...filteredMembers].sort((a, b) => order === 'asc'
             ? a.member.name.localeCompare(b.member.name)
             : b.member.name.localeCompare(a.member.name)
-        )
-        setMembers(sorted)
-        setCurrentPage(1);
-    }
+        );
+        setFilteredMembers(sorted);
+        setCurrentPage(1); // 정렬 후 페이지를 처음으로 설정
+    };
 
     // pagination
     const currentItems = filteredMembers.slice((currentPage - 1) * itemsPerPage, currentPage * itemsPerPage);
 
     const handlePageChange = (pageNumber: number) => setCurrentPage(pageNumber);
-    const handleNextPage = () => currentPage < Math.ceil(members.length / itemsPerPage) && setCurrentPage(currentPage + 1);
+    const handleNextPage = () => currentPage < Math.ceil(filteredMembers.length / itemsPerPage) && setCurrentPage(currentPage + 1);
     const handlePrevPage = () => currentPage > 1 && setCurrentPage(currentPage - 1);
 
     const csvHeaders = [
@@ -141,7 +141,7 @@ const Member = () => {
                     disabled ={currentPage === 1}>
                     <IoIosArrowBack />
                 </PageBtn>
-                {Array.from({ length: Math.ceil(members.length / itemsPerPage) }).map((_, index) => (
+                {Array.from({ length: Math.ceil(filteredMembers.length / itemsPerPage) }).map((_, index) => (
                     <PageBtn
                         key={index + 1}
                         isActive={currentPage === index + 1}
@@ -152,7 +152,7 @@ const Member = () => {
                 ))}
                 <PageBtn
                     onClick={handleNextPage}
-                    disabled ={currentPage === Math.ceil(members.length / itemsPerPage)}>
+                    disabled ={currentPage === Math.ceil(filteredMembers.length / itemsPerPage)}>
                     <IoIosArrowForward />
                 </PageBtn>
         </Pagination>
