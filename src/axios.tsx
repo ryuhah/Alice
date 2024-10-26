@@ -1,7 +1,8 @@
 import axios from "axios";
 
 const instance = axios.create({
-    baseURL : 'https://port-0-happymate2-alice-m0o4ppu0c0add90a.sel4.cloudtype.app',
+    // baseURL : 'https://port-0-happymate2-alice-m0o4ppu0c0add90a.sel4.cloudtype.app',
+    baseURL : 'http://ec2-54-161-84-212.compute-1.amazonaws.com',
     // baseURL : 'http://39.117.45.165:80'
     headers: {
         'Content-Type': 'application/json',
