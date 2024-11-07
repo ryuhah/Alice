@@ -11,8 +11,8 @@ import { ApexOptions } from 'apexcharts'
 const dummyData = {
     member: {
         id: 999,
-        loginId: "aaa",
-        name: "홍길동",
+        loginId: "",
+        name: "",
         phoneNumber: "010-0000-0000",
         supervisorPhoneNumber: "010-1111-1111",
         gpsLocation: "위치없음",
@@ -20,12 +20,19 @@ const dummyData = {
     },
     vital: {
         stress: 0,
-        depress: 2,
+        depress: 0,
         abnormalHr: 0,
-        spo2: 1,
-        hr: 1,
-        step: 21,
-        recovery: 1
+        spo2: 0,
+        hr: 0,
+        step: 0,
+        recovery: 0,
+        skinTemp: 0,
+        bodyTemp: 0,
+    },
+    score: {
+        wellness: 0,
+        physical: 0,
+        mental: 0,
     }
 };
 
@@ -36,17 +43,18 @@ const conditionLabels: Record<string, string> = {
     GOOD: '양호',
 };
 
-const PersonalInformation =() => {
+const PersonalInformation = () => {
     const { no } = useParams<{ no: string }>();
-    const [userInfo, setUserInfo] = useState<any | null>(null)
+    const [userInfo, setUserInfo] = useState<any>(dummyData)
     const [userCondition, setUserConditon] = useState<string | null>(null)
     const [chartData, setChartData] = useState<{ hr: { value: number; Ts: string }[]; spo2: { value: number; Ts: string }[] }>({ hr: [], spo2: [] });
-    const [scoreChartData, setScoreChartData] = useState<{ wellness: {score: number; Ts: string}[]; physical: {score: number; Ts: string}[]; mental: {score: number; Ts: string}[] }>({ wellness: [], physical: [], mental: [] });
+    const [scoreChartData, setScoreChartData] = useState<{ wellness: { score: number; Ts: string }[]; physical: { score: number; Ts: string }[]; mental: { score: number; Ts: string }[] }>({ wellness: [], physical: [], mental: [] });
     const [selectedTimeFrame, setSelectedTimeFrame] = useState<'day' | 'hour' | 'minute'>('day');
     const [scoreSelectedTimeFrame, setScoreSelectedTimeFrame] = useState<'day' | 'hour' | 'minute'>('day');
     const [buttonDisabled, setButtonDisabled] = useState(userCondition !== 'DANGER');
-
+    const [loadingChartData, setLoadingChartData] = useState(true);
     const date = new Date().toISOString().split('T')[0];
+    // const date = '2024-10-26'
 
     useEffect(() => {
         if (userCondition === 'DANGER') {
@@ -57,106 +65,54 @@ const PersonalInformation =() => {
     }, [userCondition]);
 
     useEffect(() => {
-        const fatchMember = async () => {
+        const fetchBasicInfo = async () => {
             try {
                 // 개인 정보
                 const response = await instance.get(`/admin/members/info/detail/${no}`)
                 setUserInfo(response.data.memberDetail)
                 console.log("Result: " + JSON.stringify(response.data.memberDetail));
-
+               
+            } catch (error) {
+                console.error("기본 정보 조회 실패", error)
+                setUserInfo(dummyData);
+            }
+        }
+        
+        const fetchChartData = async () => {
+            try {
                 // 사용자 상태정보
                 const response2 = await instance.get('/admin/members/info/condition')
-                const memberConditions = response2.data.memberConditions
-                
-                // 특정 회원의 상태 정보 필터링
-                const condition = memberConditions.find((item:any) => item.member.id.toString() === no)?.member.condition
+                const condition = response2.data.memberConditions.find((item: any) => item.id.toString() === no)?.condition
                 setUserConditon(condition || null)
                 console.log("사용자 상태 : " + JSON.stringify(condition))
 
                 // 사용자 차트정보
-                const response3 = await instance.get(`/admin/members/info/chart/${no}`,{
-                    params : {date}
+                const response3 = await instance.get(`/admin/members/info/chart/${no}`, {
+                    params: { date }
                 })
                 const memberCharts = response3.data.memberCharts;
-                console.log("사용자 차트 정보" + JSON.stringify(response3.data))
 
                 // 차트 데이터를 상태로 설정
                 setChartData({
                     hr: memberCharts.hr.map((item: any) => ({ value: item.value, Ts: item.Ts })),
                     spo2: memberCharts.spo2.map((item: any) => ({ value: item.value, Ts: item.Ts })),
                 });
-        
+
                 setScoreChartData({
                     wellness: memberCharts.wellness.map((item: any) => ({ score: item.score, Ts: item.Ts })),
                     physical: memberCharts.physical.map((item: any) => ({ score: item.score, Ts: item.Ts })),
                     mental: memberCharts.mental.map((item: any) => ({ score: item.score, Ts: item.Ts })),
                 });
-
             } catch (error) {
-                console.log("데이터 조회 실패" + error)
-
-                setUserInfo(dummyData);
-                setUserConditon(dummyData.member.condition);
-
-                const dummyTime = new Date().toISOString();
-
-                // 임시 차트 데이터 설정
-                setChartData({
-                    hr: [
-                        { value: 70, Ts: dummyTime },
-                        { value: 75, Ts: dummyTime },
-                        { value: 72, Ts: dummyTime },
-                        { value: 71, Ts: dummyTime },
-                        { value: 73, Ts: dummyTime },
-                        { value: 74, Ts: dummyTime },
-                        { value: 76, Ts: dummyTime }
-                    ],
-                    spo2: [
-                        { value: 98, Ts: dummyTime },
-                        { value: 97, Ts: dummyTime },
-                        { value: 99, Ts: dummyTime },
-                        { value: 98, Ts: dummyTime },
-                        { value: 96, Ts: dummyTime },
-                        { value: 95, Ts: dummyTime },
-                        { value: 94, Ts: dummyTime }
-                    ],
-                });
-
-                setScoreChartData({
-                    wellness: [
-                        { score: 70, Ts: dummyTime },
-                        { score: 72, Ts: dummyTime },
-                        { score: 74, Ts: dummyTime },
-                        { score: 76, Ts: dummyTime },
-                        { score: 75, Ts: dummyTime },
-                        { score: 77, Ts: dummyTime },
-                        { score: 73, Ts: dummyTime }
-                    ],
-                    physical: [
-                        { score: 80, Ts: dummyTime },
-                        { score: 82, Ts: dummyTime },
-                        { score: 81, Ts: dummyTime },
-                        { score: 83, Ts: dummyTime },
-                        { score: 85, Ts: dummyTime },
-                        { score: 86, Ts: dummyTime },
-                        { score: 84, Ts: dummyTime }
-                    ],
-                    mental: [
-                        { score: 90, Ts: dummyTime },
-                        { score: 88, Ts: dummyTime },
-                        { score: 89, Ts: dummyTime },
-                        { score: 91, Ts: dummyTime },
-                        { score: 92, Ts: dummyTime },
-                        { score: 93, Ts: dummyTime },
-                        { score: 94, Ts: dummyTime }
-                    ],
-                });
-
+                console.error("차트 데이터 조회 실패", error)
+                setUserConditon(dummyData.member.condition)
+            } finally {
+                setLoadingChartData(false);
             }
         }
-
-        fatchMember()
-    },[no, date])
+        fetchBasicInfo()
+        fetchChartData()
+    }, [no, date])
 
     const handleTimeFrameChange = (timeFrame: 'day' | 'hour' | 'minute') => {
         setSelectedTimeFrame(timeFrame);
@@ -182,16 +138,16 @@ const PersonalInformation =() => {
             return '';
         });
     };
-    
+
     if (!userInfo) {
         return <div>유저를 찾을 수 없습니다.</div>;
     }
-    
+
     // hr, spo2 차트 옵션 설정
     const chartOptions: ApexOptions = {
         chart: {
             type: 'line',
-            height: 350,
+            height: 300,
             toolbar: { show: false },
         },
         series: [
@@ -200,7 +156,7 @@ const PersonalInformation =() => {
         ],
         stroke: {
             curve: 'smooth',
-            width:2
+            width: 2
         },
         xaxis: {
             // categories: ['7일 전', '6일 전', '5일 전', '4일 전', '3일 전', '2일 전', '1일 전'],
@@ -210,17 +166,20 @@ const PersonalInformation =() => {
             text: '심박수 / 혈중 산소 차트',
             align: 'left',
             style: {
-                fontSize:'20px'
+                fontSize: '18px'
             }
         },
-        colors: ['#BBE6B5','#70BFC9'],
+        colors: ['#BBE6B5', '#70BFC9'],
+        legend: {
+            offsetY : -5
+        }
     };
 
     // score 차트 옵션 설정
     const stackedChartOptions: ApexOptions = {
         chart: {
             type: 'line',
-            height: 350,
+            height: 300,
             toolbar: { show: false }
         },
         series: [
@@ -230,7 +189,7 @@ const PersonalInformation =() => {
         ],
         stroke: {
             curve: 'smooth',
-            width:2
+            width: 2
         },
         xaxis: {
             // categories: ['7일 전', '6일 전', '5일 전', '4일 전', '3일 전', '2일 전', '1일 전'],
@@ -240,16 +199,17 @@ const PersonalInformation =() => {
             text: '지수차트',
             align: 'left',
             style: {
-                fontSize: '20px'
+                fontSize: '18px'
             }
         },
         colors: ['#B5E6BE', '#70BFC9', '#B1DFDC'],
         legend: {
-            position: 'bottom'
+            position: 'bottom',
+            offsetY : -5
         }
     };
 
-   
+
 
     const handleConfirmClick = () => {
         const userConfirmed = window.confirm('상태를 확인하시겠습니까?');
@@ -260,173 +220,177 @@ const PersonalInformation =() => {
 
     return (
         <DashboardContainer>
-            <Header/>
+            <Header />
             <Bgimg />
             <DetailContainer>
-            <HeaderContainer>
-                <Title>개인 건강 상태</Title>
-                <PrevPageBtn as={Link} to="/information">
-                    <TiArrowBackOutline />
-                    돌아가기
-                </PrevPageBtn>
-            </HeaderContainer>
-            
-            <TitleStatusBox>
-                <DetailTitle>{userInfo.member.name}님의 상세정보</DetailTitle>
-                {userCondition && <Status status={userCondition}>{conditionLabels[userCondition] || '미측정'}</Status>}
-                <ConfirmButton
-                onClick={handleConfirmClick}
-                disabled={buttonDisabled}
-            >
-                상태 확인
-            </ConfirmButton>
-            </TitleStatusBox>
+                <HeaderContainer>
+                    <Title>개인 건강 상태</Title>
+                    <PrevPageBtn as={Link} to="/information">
+                        <TiArrowBackOutline />
+                        돌아가기
+                    </PrevPageBtn>
+                </HeaderContainer>
 
-            <InfoGrid>
-                <InfoItem>
-                    <Content>이름</Content>
-                    <Content>{userInfo.member.name}</Content>
-                </InfoItem>
-                <InfoItem>
-                    <Content>아이디</Content>
-                    <Content>{userInfo.member.loginId}</Content>
-                </InfoItem>
-                <InfoItem>
-                    <Content>생년월일</Content>
-                    {/* <Content>{user.date}</Content> */}
-                </InfoItem>
-                <InfoItem>
-                    <Content>휴대폰</Content>
-                    <Content>{userInfo.member.phoneNumber}</Content>
-                </InfoItem>
-                <InfoItem>
-                    <Content>보호자휴대폰</Content>
-                    <Content>{userInfo.member.supervisorPhoneNumber}</Content>
-                </InfoItem>
-            </InfoGrid>
+                <TitleStatusBox>
+                    <DetailTitle>{userInfo.member.name}님의 상세정보</DetailTitle>
+                    {userCondition && <Status status={userCondition}>{conditionLabels[userCondition] || '미측정'}</Status>}
+                    <ConfirmButton
+                        onClick={handleConfirmClick}
+                        disabled={buttonDisabled}
+                    >
+                        상태 확인
+                    </ConfirmButton>
+                </TitleStatusBox>
 
-            
+                <InfoGrid>
+                    <InfoItem>
+                        <Content>이름</Content>
+                        <Content>{userInfo.member.name}</Content>
+                    </InfoItem>
+                    <InfoItem>
+                        <Content>아이디</Content>
+                        <Content>{userInfo.member.loginId}</Content>
+                    </InfoItem>
+                    <InfoItem>
+                        <Content>위치정보</Content>
+                        <Content>{userInfo.member.gpsLocation}</Content>
+                    </InfoItem>
+                    <InfoItem>
+                        <Content>휴대폰</Content>
+                        <Content>{userInfo.member.phoneNumber}</Content>
+                    </InfoItem>
+                    <InfoItem>
+                        <Content>보호자휴대폰</Content>
+                        <Content>{userInfo.member.supervisorPhoneNumber}</Content>
+                    </InfoItem>
+                </InfoGrid>
 
-            <MeasurementIndexContainer>
-                <MeasurementContainer>
-                    <MeasureBox>
-                        <MeasureBack>
-                            <IconCircle>
-                                <IconBack />
-                                <IconFront style={{backgroundImage : `url('/icon/physicalHealth.svg')`}}/>
-                            </IconCircle>
-                            <Measure>{userInfo?.score?.physical || '5'}</Measure>
-                        </MeasureBack>
-                        <MeasureTitle>신체건강 지수</MeasureTitle>
-                    </MeasureBox>
-                    <MeasureBox>
-                        <MeasureBack>
-                            <IconCircle>
-                                <IconBack />
-                                <IconFront style={{backgroundImage : `url('/icon/hr.svg')`}}/>
-                            </IconCircle>
-                            <MeasureFlex>
-                                <Measure>{userInfo.vital.hr}</Measure>
-                                <Content>회/분</Content>
-                            </MeasureFlex>
-                        </MeasureBack>
-                        <MeasureTitle>심박수</MeasureTitle>
-                    </MeasureBox>
-                    <MeasureBox>
-                        <MeasureBack>
-                            <IconCircle>
-                                <IconBack />
-                                <IconFront style={{backgroundImage : `url('/icon/spo2.svg')`}}/>
-                            </IconCircle>
-                            <MeasureFlex>
-                                <Measure>{userInfo.vital.spo2}</Measure>
-                                <Content>%</Content>
-                            </MeasureFlex>
-                        </MeasureBack>
-                        <MeasureTitle>혈중산소</MeasureTitle>
-                    </MeasureBox>
-                </MeasurementContainer>
-                <MeasurementContainer>
-                <MeasureBox>
-                    <MeasureBack>
-                        <IconCircle>
-                            <IconBack />
-                            <IconFront style={{backgroundImage : `url('/icon/mentalHealth.svg')`}}/>
-                        </IconCircle>
-                        <Measure>{userInfo?.score?.mental ||'5'}</Measure>
-                    </MeasureBack>
-                    <MeasureTitle>정신건강 지수</MeasureTitle>
-                </MeasureBox>
-                <MeasureBox>
-                    <MeasureBack>
-                            <IconCircle>
-                                <IconBack />
-                                <IconFront style={{backgroundImage : `url('/icon/depress.svg')`}}/>
-                            </IconCircle>
-                            <Measure>{userInfo.vital.depress}</Measure>
-                        </MeasureBack>
-                        <MeasureTitle>우울증 지수</MeasureTitle>
-                    </MeasureBox>
-                    <MeasureBox>
-                        <MeasureBack>
-                            <IconCircle>
-                                <IconBack />
-                                <IconFront style={{backgroundImage : `url('/icon/recovery.svg')`}}/>
-                            </IconCircle>
-                            <Measure>{userInfo.vital.recovery}</Measure>
-                        </MeasureBack>
-                        <MeasureTitle>회복탄력성 지수</MeasureTitle>
-                    </MeasureBox>
-                    <MeasureBox>
-                        <MeasureBack>
-                            <IconCircle>
-                                <IconBack />
-                                <IconFront style={{backgroundImage : `url('/icon/stress.svg')`}}/>
-                            </IconCircle>
-                            <Measure>{userInfo.vital.stress}</Measure>
-                        </MeasureBack>
-                        <MeasureTitle>스트레스 지수</MeasureTitle>
-                    </MeasureBox>
-                </MeasurementContainer>
+                <MeasurementIndexContainer>
+                    <MeasurementContainer>
+                        <MeasureBox>
+                            <MeasureBack>
+                                <IconCircle>
+                                    <IconBack />
+                                    <IconFront style={{ backgroundImage: `url('/icon/physicalHealth.svg')` }} />
+                                </IconCircle>
+                                <Measure>{userInfo.score.physical}</Measure>
+                            </MeasureBack>
+                            <MeasureTitle>신체건강 지수</MeasureTitle>
+                        </MeasureBox>
+                        <MeasureBox>
+                            <MeasureBack>
+                                <IconCircle>
+                                    <IconBack />
+                                    <IconFront style={{ backgroundImage: `url('/icon/hr.svg')` }} />
+                                </IconCircle>
+                                <MeasureFlex>
+                                    <Measure>{userInfo.vital.hr}</Measure>
+                                    <Content>회/분</Content>
+                                </MeasureFlex>
+                            </MeasureBack>
+                            <MeasureTitle>심박수</MeasureTitle>
+                        </MeasureBox>
+                        <MeasureBox>
+                            <MeasureBack>
+                                <IconCircle>
+                                    <IconBack />
+                                    <IconFront style={{ backgroundImage: `url('/icon/spo2.svg')` }} />
+                                </IconCircle>
+                                <MeasureFlex>
+                                    <Measure>{userInfo.vital.spo2}</Measure>
+                                    <Content>%</Content>
+                                </MeasureFlex>
+                            </MeasureBack>
+                            <MeasureTitle>혈중산소</MeasureTitle>
+                        </MeasureBox>
+                    </MeasurementContainer>
+                    <MeasurementContainer>
+                        <MeasureBox>
+                            <MeasureBack>
+                                <IconCircle>
+                                    <IconBack />
+                                    <IconFront style={{ backgroundImage: `url('/icon/mentalHealth.svg')` }} />
+                                </IconCircle>
+                                <Measure>{userInfo.score.mental}</Measure>
+                            </MeasureBack>
+                            <MeasureTitle>정신건강 지수</MeasureTitle>
+                        </MeasureBox>
+                        <MeasureBox>
+                            <MeasureBack>
+                                <IconCircle>
+                                    <IconBack />
+                                    <IconFront style={{ backgroundImage: `url('/icon/depress.svg')` }} />
+                                </IconCircle>
+                                <Measure>{userInfo.vital.depress}</Measure>
+                            </MeasureBack>
+                            <MeasureTitle>우울증 지수</MeasureTitle>
+                        </MeasureBox>
+                        <MeasureBox>
+                            <MeasureBack>
+                                <IconCircle>
+                                    <IconBack />
+                                    <IconFront style={{ backgroundImage: `url('/icon/recovery.svg')` }} />
+                                </IconCircle>
+                                <Measure>{userInfo.vital.recovery}</Measure>
+                            </MeasureBack>
+                            <MeasureTitle>회복탄력성 지수</MeasureTitle>
+                        </MeasureBox>
+                        <MeasureBox>
+                            <MeasureBack>
+                                <IconCircle>
+                                    <IconBack />
+                                    <IconFront style={{ backgroundImage: `url('/icon/stress.svg')` }} />
+                                </IconCircle>
+                                <Measure>{userInfo.vital.stress}</Measure>
+                            </MeasureBack>
+                            <MeasureTitle>스트레스 지수</MeasureTitle>
+                        </MeasureBox>
+                    </MeasurementContainer>
+
+
+                    <div style={{ width: '18px' }} />
+                    <WellnessCircle>
+                        <WellnessCircleBack />
+                        <WellnessCircleFront />
+                        <WellnessFlex>
+                            <MeasureTitle>웰니스 지수</MeasureTitle>
+                            <WellnessMeasure>{userInfo.score.wellness}</WellnessMeasure>
+                        </WellnessFlex>
+                    </WellnessCircle>
+                </MeasurementIndexContainer>
+
+                {/* 차트 로딩 중이면 로딩 표시, 아니면 차트 표시 */}
+                {loadingChartData ? (
+                    <div>차트 데이터를 불러오는 중...</div>
+                ) : (
+                    <ChartContainer>
+                        <ChartDiv>
+                            <ButtonContainer>
+                                <TimeButton onClick={() => handleTimeFrameChange('day')}>일</TimeButton>
+                                <TimeButton onClick={() => handleTimeFrameChange('hour')}>시</TimeButton>
+                                <TimeButton onClick={() => handleTimeFrameChange('minute')}>분</TimeButton>
+                            </ButtonContainer>
+                            <ChartWrapper>
+                                <ReactApexChart options={chartOptions} series={chartOptions.series} type="line" height={350} />
+                            </ChartWrapper>
+                        </ChartDiv>
+                        <ChartDiv>
+                            <ButtonContainer>
+                                <TimeButton onClick={() => handleScoreTimeFrameChange('day')}>일</TimeButton>
+                                <TimeButton onClick={() => handleScoreTimeFrameChange('hour')}>시</TimeButton>
+                                <TimeButton onClick={() => handleScoreTimeFrameChange('minute')}>분</TimeButton>
+                            </ButtonContainer>
+                            <ChartWrapper>
+                                <ReactApexChart options={stackedChartOptions} series={stackedChartOptions.series} type="line" height={350} />
+                            </ChartWrapper>
+                        </ChartDiv>
+                    </ChartContainer>
+                )}
+
                 
-                
-                <div style={{width:'5%' }}/>
-                <WellnessCircle>
-                    <WellnessCircleBack />
-                    <WellnessCircleFront />
-                    <WellnessFlex>
-                        <MeasureTitle>웰니스 지수</MeasureTitle>
-                        <WellnessMeasure>{userInfo?.score?.wellness||'5'}</WellnessMeasure>
-                    </WellnessFlex>
-                </WellnessCircle>
-            </MeasurementIndexContainer>
-
-            
-            <ChartContainer>
-                <ChartDiv>
-                    <ButtonContainer>
-                        <TimeButton onClick={() => handleTimeFrameChange('day')}>일</TimeButton>
-                        <TimeButton onClick={() => handleTimeFrameChange('hour')}>시</TimeButton>
-                        <TimeButton onClick={() => handleTimeFrameChange('minute')}>분</TimeButton>
-                    </ButtonContainer>
-                    <ChartWrapper>
-                        <ReactApexChart options={chartOptions} series={chartOptions.series} type="line" height={350} />
-                    </ChartWrapper>
-                </ChartDiv>
-                <ChartDiv>
-                    <ButtonContainer>
-                        <TimeButton onClick={() => handleScoreTimeFrameChange('day')}>일</TimeButton>
-                        <TimeButton onClick={() => handleScoreTimeFrameChange('hour')}>시</TimeButton>
-                        <TimeButton onClick={() => handleScoreTimeFrameChange('minute')}>분</TimeButton>
-                    </ButtonContainer>
-                    <ChartWrapper>
-                        <ReactApexChart options={stackedChartOptions} series={stackedChartOptions.series} type="line" height={350} />
-                    </ChartWrapper>
-                </ChartDiv>
-            </ChartContainer>
 
             </DetailContainer>
-            
+
         </DashboardContainer>
     )
 }
@@ -434,7 +398,7 @@ const PersonalInformation =() => {
 export default PersonalInformation
 
 interface UserStatusProps {
-    status : string;
+    status: string;
 }
 
 const DashboardContainer = styled.div`
@@ -471,12 +435,12 @@ const HeaderContainer = styled.div`
 `
 const Title = styled.h2`
     color : #245671;
-    font-size : 26px;
+    font-size : 22px;
 `
 
 const PrevPageBtn = styled.button`
-    padding : 10px 20px;
-    font-size : 18px;
+    padding : 10px 15px;
+    font-size : 14px;
     font-weight : bold;
     background-color : #70BFC9;
     color : white;
@@ -494,10 +458,10 @@ const PrevPageBtn = styled.button`
 const TitleStatusBox = styled.div`
     display : flex;
     align-items : center;
-    gap : 30px;
+    gap : 15px;
 `
 const DetailTitle = styled.h2`
-    font-size : 20px;
+    font-size : 18px;
     font-weight : bold;
 `
 
@@ -506,6 +470,7 @@ const Status = styled.div<UserStatusProps>`
     padding : 5px 20px;
     color : white;
     border-radius : 20px;
+    margin-left : 25px;
     background-color: ${props => {
         switch (props.status) {
             case 'GOOD':
@@ -549,7 +514,7 @@ const InfoItem = styled.div`
 `
 
 const Content = styled.div`
-    font-size : 17px;
+    font-size : 16px;
     font-weight : 600;
 `
 
@@ -557,12 +522,12 @@ const MeasurementIndexContainer = styled.div`
     display : flex;
     margin-top : 40px;
     justify-content : space-between;
-    gap : 5px;
+    gap : 25px;
 `
 
 const MeasurementContainer = styled.div`
     display : flex;
-    gap : 15px;
+    gap : 10px;
 `
 
 const MeasureBox = styled.div`
@@ -572,8 +537,8 @@ const MeasureBox = styled.div`
 `
 
 const MeasureBack = styled.div`
-    width : 150px;
-    height : 212px;
+    width : 120px;
+    height : 180px;
     background-color : #E7F4F5;
     border-radius : 10px;
     display : flex;
@@ -584,13 +549,13 @@ const MeasureBack = styled.div`
 `
 
 const MeasureTitle = styled.div`
-    font-size : 18px;
+    font-size : 15px;
     font-weight : 600;
     text-align : center;
 `
 
 const IconCircle = styled.div`
-    margin : 15px 0 25px;
+    margin : 20px 0 20px;
     display : flex;
     justify-content : center;
     align-items : center;
@@ -622,7 +587,7 @@ const MeasureFlex = styled.div`
 `
 
 const Measure = styled.div`
-    font-size : 36px;
+    font-size : 32px;
     font-weight : bold;
     text-align : center;
 `
@@ -636,8 +601,8 @@ const WellnessCircle = styled.div`
 
 const WellnessCircleBack = styled.div`
     position : absolute;
-    width : 290px;
-    height : 290px;
+    width : 250px;
+    height : 250px;
     border-radius : 50%;
     background : linear-gradient(180deg, #E7F4F5 0%, #F0F6EA 100%);
     z-index : 1;
@@ -647,8 +612,8 @@ const WellnessCircleBack = styled.div`
 
 const WellnessCircleFront = styled.div`
     position : absolute;
-    width : 240px;
-    height : 240px;
+    width : 210px;
+    height : 210px;
     border-radius : 50%;
     background : radial-gradient(transparent, white);
     z-index : 2;
@@ -663,7 +628,7 @@ const WellnessFlex = styled.div`
 `
 
 const WellnessMeasure = styled.div`
-    font-size : 60px;
+    font-size : 50px;
     font-weight : bold;
     text-align : center;
 `
@@ -675,7 +640,7 @@ const ButtonContainer = styled.div`
 `;
 
 const TimeButton = styled.button`
-    padding: 10px 15px;
+    padding: 6px 12px;
     font-size: 14px;
     background-color: #70BFC9;
     color: white;
@@ -686,10 +651,10 @@ const TimeButton = styled.button`
     &:hover {
         background-color: #B1DFDC;
     }
-`;
+`; 
 
 const ChartContainer = styled.div`
-    margin-top: 100px;
+    margin-top: 70px;
     width: 100%;
     display: flex;
     justify-content: center;

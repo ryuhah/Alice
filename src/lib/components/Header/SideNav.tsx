@@ -28,7 +28,7 @@ const SideNav = () => {
         <SideNavContainer>
           <MenuItem
             isActive={activeMenu !== null}
-            position={activeMenu === 158? 158 : activeMenu === 1 ? 228 : 158}
+            position={activeMenu === 133? 133 : activeMenu === 1 ? 203 : 133}
           >
           </MenuItem>
           <IconContainer>
@@ -50,11 +50,11 @@ const SideNav = () => {
 export default SideNav
 
 const SideNavContainer = styled.div`
-    width : 90px;
+    width : 80px;
     height :95.5%;
     background-color : #70BFC9;
-    margin-left : 25px;
-    margin-top : 20px;
+    margin-left : 15px;
+    margin-top : 15px;
     border-top-left-radius : 15px;
     display: flex;
     justify-content: center;
@@ -97,4 +97,4 @@ const IconButton = styled.div`
         color : white;
         text-decoration : none;
     }
-`;
+`; 

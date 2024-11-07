@@ -51,12 +51,12 @@ export default FilterBtn
 
 const Button = styled.button<{isSelected : boolean}>`
     height : 40px;
-    padding : 0 20px;
+    padding : 0 15px;
     border-radius : 20px;
-    font-size : 18px;
+    font-size : 14px;
     color : ${({ isSelected }) => (isSelected ? 'white' : '#b4b4b4')};
     cursor : pointer;
     background-color: ${({ isSelected }) => (isSelected ? '#70BFC9' : 'transparent')};
     border-color : #70BFC9;
     border-style : ${({ isSelected }) => (isSelected ? 'none' : 'solid')};
-`
+` 

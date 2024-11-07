@@ -12,8 +12,10 @@ const Login = () => {
     const handleLogin = (event: React.FormEvent<HTMLFormElement>) => {
         event.preventDefault();
         instance.post("/auth/admin/login", {
-            loginId: "admin1",
-            password: "12341234"
+            // loginId: "admin1",
+            // password: "12341234"
+            loginId: username,
+            password: password
 
         }).then((res) => {
             const {accessToken, refreshToken} = res.data
@@ -91,7 +93,7 @@ const LoginBox = styled.div`
 
 const Title = styled.h1`
   margin-top : -80px;
-  font-size : 50px;
+  font-size : 44px;
   color : #245671;
 `
 
@@ -100,12 +102,12 @@ const Form = styled.form`
   display : flex;
   flex-direction : column;
   width : 450px;
-  gap : 15px;
+  gap : 8px;
 `
 
 const Input = styled.input`
-  padding : 20px ;
-  font-size : 20px;
+  padding : 20px 15px ;
+  font-size : 18px;
   border : 1px solid #ccc;
   border-radius : 10px;
 
@@ -128,4 +130,4 @@ const LoginButton = styled.button`
   &:hover {
     background-color : #1d4a5e;
   }
-`
+` 

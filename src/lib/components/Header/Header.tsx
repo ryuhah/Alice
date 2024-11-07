@@ -35,7 +35,7 @@ const TitleFont = styled.span`
     font-style: normal;
     }
     font-family: 'yg-jalnan', sans-serif;
-    font-size : 32px;
+    font-size : 25px;
 
 `
 
@@ -45,5 +45,5 @@ const TitleNaju = styled(TitleFont)`
 `
 
 const Title = styled(TitleFont)`
-    color : #245671
+    color : #245671 
 `

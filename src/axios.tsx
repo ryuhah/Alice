@@ -1,25 +1,24 @@
 import axios from "axios";
 
 const instance = axios.create({
-    // baseURL : 'https://port-0-happymate2-alice-m0o4ppu0c0add90a.sel4.cloudtype.app',
-    baseURL : 'http://ec2-54-161-84-212.compute-1.amazonaws.com',
-    // baseURL : 'http://39.117.45.165:80'
+    baseURL: 'https://api.alice-happymate.com',
+    // baseURL: 'http://localhost:8080',
     headers: {
         'Content-Type': 'application/json',
     },
-
+  
 });
 
 instance.interceptors.response.use(
     (response) => response,
     (error) => {
-      if (error.response && error.response.status === 401) {
-        alert("토큰이 만료되었습니다. 다시 로그인해주세요");
-        window.location.replace('/login')
-      }
-      return Promise.reject(error)
+        if (error.response && error.response.status === 401) {
+            alert("토큰이 만료되었습니다. 다시 로그인해주세요");
+            window.location.replace('/login')
+        }
+        return Promise.reject(error)
     }
-  )
+)
 
 export const setHeader = (token: string | null) => {
     if (token) {

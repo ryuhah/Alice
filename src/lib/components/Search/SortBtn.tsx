@@ -33,12 +33,12 @@ export default SortBtn
 
 const SortBtnContainer = styled.button`
     height : 40px;
-    padding : 0 20px;
+    padding : 0 15px;
     border-radius : 20px;
-    font-size : 18px;
+    font-size : 14px;
     color : #245671;
     cursor : pointer;
     background-color: transparent;
     border-color : #70BFC9;
     border-style : solid; 
-`
+` 

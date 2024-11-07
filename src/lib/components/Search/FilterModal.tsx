@@ -67,9 +67,9 @@ const ModalContainer = styled.div`
     margin-left : 900px;
     background : white;
     border-radius : 20px;
-    width : 400px;
+    width : 380px;
     box-shadow: #8BC1DE 0px 1px 2px 0px, #8BC1DE 0px 2px 6px 2px;
-    padding : 20px 20px 30px;
+    padding : 15px 20px;
 
 `
 
@@ -105,7 +105,7 @@ const Filter = styled.button<{isSelected : boolean}>`
     padding : 5px 10px;
     border-radius : 20px;
     margin: 0 5px;
-    font-size : 16px;
+    font-size : 14px;
     color:  ${({ isSelected }) => (isSelected ? '#000000' : '#B4B4B4')};
     cursor: pointer;
     background-color: transparent;
@@ -124,7 +124,7 @@ const ModalFooter = styled.div`
 const ApplyButton = styled.button`
     padding : 10px 30px;
     border-radius : 10px;
-    font-size : 18px;
+    font-size : 14px;
     cursor : pointer;
     border-style : none; 
 `
@@ -137,4 +137,4 @@ const ApplyBtn = styled(ApplyButton)`
 const ResetBtn = styled(ApplyButton)`
     background-color : #D9D9D9;
     color : black;
-`
+` 

@@ -37,10 +37,10 @@ const SearchContainer = styled.div`
 `
 
 const Input = styled.input`
-    font-size : 18px;
+    font-size : 14px;
     border-style : none;
     margin-left : 20px;
-    padding : 10px 0;
+    padding : 5px 0;
     background-color: transparent;
 `
 
@@ -54,3 +54,4 @@ const SearchBtn = styled.button`
     background-color: transparent;
 
 `
+ 

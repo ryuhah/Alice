@@ -6,36 +6,51 @@ import { CSVLink } from "react-csv";
 import SortBtn from '../Search/SortBtn';
 import FilterBtn from '../Search/FilterBtn';
 import instance from '../../../axios';
+import { initMembers, MemberSummary, patchMembers } from './types';
 
 const Member = () => {
-    const [members, setMembers] = useState<any[]>([])
-    const [filteredMembers, setFilteredMembers] = useState<any[]>([]);
+    const [members, setMembers] = useState<MemberSummary[]>([])
+    const [filteredMembers, setFilteredMembers] = useState<MemberSummary[]>([]);
     const [currentPage, setCurrentPage] = useState(1)
-    const itemsPerPage= 10;
+    const itemsPerPage = 10;
     const [selectedFilters, setSelectedFilters] = useState<string[]>([])
     const [searchTerm, setSearchTerm] = useState<string>('');
-
+    // TODO: 기본정보 받아오기 -> 생체데이터 페이징 형태로 받아오기 
     useEffect(() => {
         const fatchMembers = async () => {
-            try{
+            try {
+                const response = await instance.get('/admin/members/info')
+                const members: MemberSummary[] = initMembers(response.data);
+                setMembers(members)
+                setFilteredMembers(members)
+                console.log("Loaded members data:", response.data);
+            } catch (error) {
+                console.log("전체회원 상세정보 조회 실패 : " + error)
+            }
+        }
+
+        const fatchVitals = async () => {
+            try {
                 const response = await instance.get('/admin/members/info/detail')
-                setMembers(response.data.memberDetails)
-                setFilteredMembers(response.data.memberDetails)
+                const members: MemberSummary[] = patchMembers(response.data.memberDetails);
+                setMembers(members)
+                setFilteredMembers(members)
                 console.log("Loaded members data:", response.data.memberDetails);
             } catch (error) {
-                console.log("전체회원 상세정보 조회 실패 : "+ error)
+                console.log("전체회원 상세정보 조회 실패 : " + error)
             }
         }
 
         fatchMembers()
+        fatchVitals()
     }, [])
 
     // filter
     const handleSearch = () => {
         const filteredData = members.filter(member =>
-            member.member.loginId.includes(searchTerm) ||
-            member.member.name.includes(searchTerm) ||
-            member.member.phoneNumber.includes(searchTerm)
+            member.loginId.includes(searchTerm) ||
+            member.name.includes(searchTerm) ||
+            member.phoneNumber.includes(searchTerm)
         );
         setFilteredMembers(filteredData);
         setCurrentPage(1);
@@ -44,8 +59,8 @@ const Member = () => {
     // sort
     const handleSortByName = (order: 'asc' | 'desc') => {
         const sorted = [...filteredMembers].sort((a, b) => order === 'asc'
-            ? a.member.name.localeCompare(b.member.name)
-            : b.member.name.localeCompare(a.member.name)
+            ? a.name.localeCompare(b.name)
+            : b.name.localeCompare(a.name)
         );
         setFilteredMembers(sorted);
         setCurrentPage(1); // 정렬 후 페이지를 처음으로 설정
@@ -71,7 +86,7 @@ const Member = () => {
         { label: "심박수", key: "vital.hr" },
         { label: "활동량", key: "vital.step" }
     ]
-    
+
     const getFormattedDate = () => {
         const today = new Date();
         const year = today.getFullYear();
@@ -79,66 +94,69 @@ const Member = () => {
         const day = String(today.getDate()).padStart(2, '0');
         return `${year}-${month}-${day}`
     };
-    
+
 
     return (
         <MemberContainer>
             <HeaderContainer>
                 <Title>사용자 정보</Title>
                 <SearchBox>
-                    <FilterBtn 
+                    <FilterBtn
                         selectedFilters={selectedFilters}
-                        setSelectedFilters={setSelectedFilters}/>
-                    <SearchBar 
-                        value={searchTerm} 
-                        onChange={(e) => setSearchTerm(e.target.value)} 
-                        onSearch={handleSearch}/>
+                        setSelectedFilters={setSelectedFilters} />
+                    <SearchBar
+                        value={searchTerm}
+                        onChange={(e) => setSearchTerm(e.target.value)}
+                        onSearch={handleSearch} />
                 </SearchBox>
             </HeaderContainer>
             <SortContainer>
                 <CSVLinkBtn
-                    data={filteredMembers} 
-                    headers={csvHeaders} 
+                    data={filteredMembers}
+                    headers={csvHeaders}
                     filename={`사용자정보_${getFormattedDate()}.csv`}>
-                        엑셀 다운로드
+                    엑셀 다운로드
                 </CSVLinkBtn>
                 <SortBtn label='이름순' onSort={handleSortByName} />
             </SortContainer>
             <TableHeader>
-                <div style={{width : "10%"}}>No.</div>
-                <div style={{width : "10%"}}>ID</div>
-                <div style={{width : "10%"}}>이름</div>
-                <div style={{width : "10%"}}>휴대폰</div>
-                <div style={{width : "10%"}}>위치</div>
-                <div style={{width : "10%"}}>스트레스</div>
-                <div style={{width : "10%"}}>우울증</div>
-                <div style={{width : "10%"}}>심박이벤트여부</div>
-                <div style={{width : "10%"}}>혈중산소포화도</div>
-                <div style={{width : "10%"}}>심박수</div>
-                <div style={{width : "10%"}}>활동량</div>
+                <div style={{ width: "10%" }}>No.</div>
+                <div style={{ width: "10%" }}>ID</div>
+                <div style={{ width: "10%" }}>이름</div>
+                <div style={{ width: "15%" }}>휴대폰</div>
+                <div style={{ width: "10%" }}>위치</div>
+                <div style={{ width: "10%" }}>스트레스</div>
+                <div style={{ width: "10%" }}>우울증</div>
+                <div style={{ width: "15%" }}>심박이벤트여부</div>
+                <div style={{ width: "15%" }}>혈중산소포화도</div>
+                <div style={{ width: "10%" }}>심박수</div>
+                <div style={{ width: "10%" }}>활동량</div>
             </TableHeader>
             <hr />
             <TableBody>
-                {currentItems.map((item, index) => (
-                    <TableRow key = {index}>
-                        <div style={{width : "10%"}}>{item.member.id}</div>
-                        <div style={{width : "10%"}}>{item.member.loginId}</div>
-                        <div style={{width : "10%"}}>{item.member.name}</div>
-                        <div style={{width : "10%"}}>{item.member.phoneNumber}</div>
-                        <div style={{width : "10%"}}>{item.member.gpsLocation}</div>
-                        <div style={{width : "10%"}}>{item.vital.stress}</div>
-                        <div style={{width : "10%"}}>{item.vital.depress}</div>
-                        <div style={{width : "10%"}}>{item.vital.abnormalHr}</div>
-                        <div style={{width : "10%"}}>{item.vital.spo2}%</div>
-                        <div style={{width : "10%"}}>{item.vital.hr}</div>
-                        <div style={{width : "10%"}}>{item.vital.step}</div>
-                    </TableRow>
-                ))}
+                {currentItems.map((item, index) => {
+                    console.log("Loaded members data2:", members);
+                    return (
+                        <TableRow key={index}>
+                            <div style={{ width: "10%" }}>{item.id}</div>
+                            <div style={{ width: "10%" }}>{item.loginId}</div>
+                            <div style={{ width: "10%" }}>{item.name}</div>
+                            <div style={{ width: "15%" }}>{item.phoneNumber}</div>
+                            <div style={{ width: "10%" }}>{item.gpsLocation}</div>
+                            <div style={{ width: "10%" }}>{item?.stress}</div>
+                            <div style={{ width: "10%" }}>{item?.depress}</div>
+                            <div style={{ width: "15%" }}>{item?.abnormalHr}</div>
+                            <div style={{ width: "15%" }}>{item?.spo2}%</div>
+                            <div style={{ width: "10%" }}>{item?.hr}</div>
+                            <div style={{ width: "10%" }}>{item?.step}</div>
+                        </TableRow>
+                    )
+                })}
             </TableBody>
             <Pagination>
                 <PageBtn
                     onClick={handlePrevPage}
-                    disabled ={currentPage === 1}>
+                    disabled={currentPage === 1}>
                     <IoIosArrowBack />
                 </PageBtn>
                 {Array.from({ length: Math.ceil(filteredMembers.length / itemsPerPage) }).map((_, index) => (
@@ -152,10 +170,10 @@ const Member = () => {
                 ))}
                 <PageBtn
                     onClick={handleNextPage}
-                    disabled ={currentPage === Math.ceil(filteredMembers.length / itemsPerPage)}>
+                    disabled={currentPage === Math.ceil(filteredMembers.length / itemsPerPage)}>
                     <IoIosArrowForward />
                 </PageBtn>
-        </Pagination>
+            </Pagination>
         </MemberContainer>
     )
 }
@@ -189,14 +207,12 @@ const SortContainer = styled.div`
 const CSVLinkBtn = styled(CSVLink)`
     text-decoration: none;
     padding: 10px;
-    margin-left: 10px;
     border-radius: 10px;
     background-color: #70BFC9;
     color: white;
     cursor: pointer;
-    font-size : 18px;
+    font-size : 14px;
     
-
     &:hover {
         background-color: #B1DFDC;
     }
@@ -204,7 +220,7 @@ const CSVLinkBtn = styled(CSVLink)`
 
 const Title = styled.h2`
     color : #245671;
-    font-size : 26px;
+    font-size : 22px;
 `
 
 const TableHeader = styled.div`
@@ -212,35 +228,33 @@ const TableHeader = styled.div`
     justify-content : space-between;
     text-align : center;
     font-weight : bold;
-    padding : 10px 0;
     margin-top : 10px;
-    font-size : 18px;
+    font-size : 16px;
 `
 
 const TableBody = styled.div`
-    height : 68%;
+    height : 64%;
 `
 
 const TableRow = styled.div`
     display : flex;
     justify-content : space-between;
     text-align : center;
-    padding : 13px 0;
-    font-size : 16px;
+    padding : 9.5px 0;
+    font-size : 14px;   
 `
 
 const Pagination = styled.div`
-    position : absolute;
     bottom : 7%;
-    left : 50%;
     display : flex;
     justify-content : center;
     margin-top: 20px;
 `
 
-const PageBtn = styled.button<{isActive? : boolean}>`
-    padding: 10px;
-    margin: 0 5px;
+const PageBtn = styled.button<{ isActive?: boolean }>`
+    width : 30px;
+    height : 30px;
+    margin: 0 3px;
     border: none;
     background-color: ${({ isActive }) => (isActive ? '#70BFC9' : '#f1f1f1')};
     color: ${({ isActive }) => (isActive ? 'white' : 'black')};

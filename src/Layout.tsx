@@ -35,8 +35,8 @@ const AppContainer = styled.div`
 const MainContent = styled.div`
   display : flex;
   flex: 1;
-  margin : 120px 50px 50px;
-  height: calc(100% - 150px);
+  margin : 100px 50px 50px;
+  height: calc(100% - 130px);
   background-color : white;
   border-radius : 30px 30px 0 0;
   box-shadow: #8BC1DE 0px 1px 2px 0px, #8BC1DE 0px 2px 6px 2px;
@@ -54,4 +54,4 @@ const Bgimg = styled.div`
     z-index : 1;
     background-size : cover;
     background-repeat : no-repeat;
-`
+` 

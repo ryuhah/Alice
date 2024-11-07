@@ -6,6 +6,7 @@ import { Link } from 'react-router-dom';
 import SortBtn from '../Search/SortBtn';
 import instance from '../../../axios';
 import { LuSiren } from "react-icons/lu";
+import { initCondition, MemberCondition } from './types';
 
 type ConditionType = 'NOT_MEASUREMENT' | 'DANGER' | 'CAUTION' | 'GOOD';
 
@@ -14,11 +15,11 @@ const conditionLabels: Record<ConditionType, string> = {
     DANGER: '위험',
     CAUTION: '주의',
     GOOD: '양호',
-};
+}; 
 
 const Information = () => {
-    const [members, setMembers] = useState<any[]>([]);
-    const [filteredMembers, setFilteredMembers] = useState<any[]>([]);
+    const [members, setMembers] = useState<MemberCondition[]>([]);
+    const [filteredMembers, setFilteredMembers] = useState<MemberCondition[]>([]);
     const [selectedFilters, setSelectedFilters] = useState<string[]>([])
     const [searchTerm, setSearchTerm] = useState<string>('');
     const [conditionCounts, setConditionCounts] = useState<Record<ConditionType, number>>({
@@ -28,61 +29,55 @@ const Information = () => {
         GOOD: 0
     })
 
-    const addDummyData = (data : any[]) => {
+    const addDummyData = (data: MemberCondition[]) => {
         const dummyData = [
-            {member:{
-                id:999,
-                loginId:"aaa",
-                name:"홍길동",
-                phoneNumber:"010-0000-0000",
-                supervisorPhoneNumber:"010-1111-1111",
-                gpsLocation:"위치없음",
+            {
+                id: 999,
+                loginId: "hong1234",
+                name: "홍길동",
                 condition: 'DANGER'
-            },
-            vital:{
-                stress:0,
-                depress:2,
-                abnormalHr:0,
-                spo2:1,
-                hr:1,
-                step:21,
-                recovery:1
-            }} 
+
+            }
         ]
-        return[...data, ...dummyData]
+        return [...data, ...dummyData]
     }
 
     useEffect(() => {
         const fatchMembers = async () => {
-            try{
-                // 전체 사용자 정보
-                const response = await instance.get('/admin/members/info/detail')
-                const updatedData = addDummyData(response.data.memberDetails)
-                // setMembers(response.data.memberDetails)
-                // setFilteredMembers(response.data.memberDetails)
+            try {
+                const response = await instance.get('/admin/members/info')
+                const conditions: MemberCondition[] = initCondition(response.data);
+                const updatedData: MemberCondition[] = addDummyData(conditions);
                 setMembers(updatedData)
                 setFilteredMembers(updatedData)
-                console.log("사용자 정보 조회 성공 " + JSON.stringify(response.data.memberDetails));
-
-                // 사용자 상태정보
-                const response2 = await instance.get('/admin/members/info/condition')
-                // setMembers(response2.data.memberConditions)
-                // setFilteredMembers(response2.data.memberConditions)
-                setMembers(addDummyData(response2.data.memberConditions))
-                setFilteredMembers(addDummyData(response2.data.memberConditions))
-                console.log("사용자 정보 조회 성공 " + JSON.stringify(response2.data.memberConditions));
+                console.log("사용자 정보 조회 성공 " + JSON.stringify(response.data));
 
                 // 상태별 사용자 수 계산
-                calculateConditionCounts(response2.data.memberConditions)
+                calculateConditionCounts(updatedData)
             } catch (error) {
-                console.log("데이터 조회 실패:"+error)
+                console.log("데이터 조회 실패:" + error)
+            }
+        }
+        const fatchConditions = async () => {
+            try {
+                const response = await instance.get('/admin/members/info/condition')
+                const updatedData = addDummyData(response.data.memberConditions);
+                setMembers(updatedData)
+                setFilteredMembers(updatedData)
+                console.log("사용자 정보 조회 성공 " + JSON.stringify(response.data.memberConditions));
+
+                // 상태별 사용자 수 계산
+                calculateConditionCounts(updatedData)
+            } catch (error) {
+                console.log("데이터 조회 실패:" + error)
             }
         }
         fatchMembers()
-    },[])
+        fatchConditions()
+    }, [])
 
     // progressbar
-    const calculateConditionCounts = (membersData : any[]) => {
+    const calculateConditionCounts = (membersData: any[]) => {
         const counts: Record<ConditionType, number> = {
             NOT_MEASUREMENT: 0,
             DANGER: 0,
@@ -91,7 +86,7 @@ const Information = () => {
         }
 
         membersData.forEach((member) => {
-            const condition = member.member.condition as ConditionType
+            const condition = member.condition as ConditionType
             if (counts[condition] !== undefined) {
                 counts[condition]++
             }
@@ -110,11 +105,11 @@ const Information = () => {
             // 검색어가 있을 경우 필터링
             const filteredData = members.filter(
                 (member) =>
-                    member.member &&
+                    member &&
                     (
-                        (member.member.loginId && member.member.loginId.includes(searchTerm)) ||
-                        (member.member.name && member.member.name.includes(searchTerm)) ||
-                        (member.member.phoneNumber && member.member.phoneNumber.includes(searchTerm))
+                        (member.loginId && member.loginId.includes(searchTerm)) ||
+                        (member.name && member.name.includes(searchTerm))
+                        // || (member.phoneNumber && member.phoneNumber.includes(searchTerm))
                     )
             );
             setFilteredMembers(filteredData);
@@ -122,27 +117,27 @@ const Information = () => {
     };
 
     // sort
-    const handleSortByName = (order : 'asc' | 'desc') => {
-        const sorted = [...filteredMembers].sort((a, b) => 
+    const handleSortByName = (order: 'asc' | 'desc') => {
+        const sorted = [...filteredMembers].sort((a, b) =>
             order === 'asc'
-                ? a.member.name.localeCompare(b.member.name)
-                : b.member.name.localeCompare(a.member.name)
+                ? a.name.localeCompare(b.name)
+                : b.name.localeCompare(a.name)
         )
         setFilteredMembers(sorted)
     }
 
-    const handleSortByCondition = (order : 'asc' | 'desc') => {
+    const handleSortByCondition = (order: 'asc' | 'desc') => {
 
-        const conditionPriority:Record<ConditionType, number> = {
-            'NOT_MEASUREMENT' : 0,
-            'DANGER' : 3,
-            'CAUTION' : 2,
-            'GOOD' : 1
+        const conditionPriority: Record<ConditionType, number> = {
+            'NOT_MEASUREMENT': 0,
+            'DANGER': 3,
+            'CAUTION': 2,
+            'GOOD': 1
         }
 
         const sorted = [...filteredMembers].sort((a, b) => {
-            const priorityA = conditionPriority[a.member.condition as ConditionType] || 0
-            const priorityB = conditionPriority[b.member.condition as ConditionType] || 0
+            const priorityA = conditionPriority[a.condition as ConditionType] || 0
+            const priorityB = conditionPriority[b.condition as ConditionType] || 0
 
             return order === 'asc' ? priorityA - priorityB : priorityB - priorityA;
         })
@@ -150,7 +145,7 @@ const Information = () => {
     }
 
     // 위험 사용자 필터링
-    const dangerousMembers = filteredMembers.filter(member => member.member.condition === 'DANGER');
+    const dangerousMembers = filteredMembers.filter(member => member.condition === 'DANGER');
 
     return (
         <InformationContainer>
@@ -160,13 +155,13 @@ const Information = () => {
                     <StyledLuSiren danger={dangerousMembers.length > 0} />
                     <DangerousMembersList danger={dangerousMembers.length > 0}>
                         {dangerousMembers.map(member => (
-                            <DangerousMemberItem key={member.member.id}>
-                                <Link to={`/dashboard/${member.member.id}`}>{member.member.name}-산소포화도 낮음</Link>
+                            <DangerousMemberItem key={member.id}>
+                                <Link to={`/dashboard/${member.id}`}>{member.name}-산소포화도 낮음</Link>
                             </DangerousMemberItem>
                         ))}
                     </DangerousMembersList>
                 </DangerMembersBox>
-                
+
                 <div style={{ flex: 1 }} />
                 <SearchBox>
                     <FilterBtn
@@ -192,30 +187,30 @@ const Information = () => {
                     {Object.entries(conditionCounts)
                         .filter(([key]) => key !== 'NOT_MEASUREMENT')
                         .map(([key, value]) => (
-                        <ProgressSegment
-                            key={key}
-                            status={key as ConditionType}
-                            width={(value / members.length) * 100}
-                        >
-                            {value}명
-                        </ProgressSegment>
-                    ))}
+                            <ProgressSegment
+                                key={key}
+                                status={key as ConditionType}
+                                width={(value / members.length) * 100}
+                            >
+                                {value}명
+                            </ProgressSegment>
+                        ))}
                 </ProgressBar>
             </ProgressBarContainer>
 
             <ScrollContainer>
                 <UserContainer>
                     {filteredMembers.map((item, index) => (
-                        <UserCard key={index} status={item.member.condition}>
-                            <UserName>{item.member.name}</UserName>
-                            <UserId>{item.member.loginId}</UserId>
-                            <Status>{conditionLabels[item.member.condition as ConditionType]}</Status>
-                            <DetailButton as={Link} to={`/dashboard/${item.member.id}`}>상세정보</DetailButton>
+                        <UserCard key={index} status={item.condition}>
+                            <UserName>{item.name}</UserName>
+                            <UserId>{item.loginId}</UserId>
+                            <Status>{conditionLabels[item.condition as ConditionType]}</Status>
+                            <DetailButton as={Link} to={`/dashboard/${item.id}`}>상세정보</DetailButton>
                         </UserCard>
                     ))}
                 </UserContainer>
             </ScrollContainer>
-            
+
 
         </InformationContainer>
     )
@@ -248,24 +243,25 @@ const InformationContainer = styled.div`
 const HeaderContainer = styled.div`
     display : flex;
     justify-content : space-between;
-    align-items : center;
+    align-items : start ;
     
 `
 const SearchBox = styled.div`
     display : flex;
     align-items : center;
     gap :10px;
+    margin-top : 13.5px;
 `
 
 const DangerMembersBox = styled.div`
     display : flex;
     justify-content : center;
     align-items : center;
-    gap :20px;   
+    gap :15px;   
 `
 
-const StyledLuSiren = styled(LuSiren)<{ danger: boolean }>`
-    font-size: 34px;
+const StyledLuSiren = styled(LuSiren) <{ danger: boolean }>`
+    font-size: 30px;
     color: ${props => (props.danger ? '#FF6347' : '#A9A9A9')}; /* 위험 사용자가 없으면 회색 */
 `;
 
@@ -273,13 +269,12 @@ const DangerousMembersList = styled.div<{ danger: boolean }>`
     width: 250px;
     height: 50px;
     overflow-y: auto;
-    display: block;
-    font-size: 16px;
+    // display: block;
+    font-size: 14px;
     color: black;
     padding: 10px;
     border-radius: 10px;
     border: ${props => (props.danger ? '2px solid #70BFC9' : 'none')}; /* 위험 사용자가 없으면 border 제거 */
-    margin-top: 10px;
 `;
 
 const DangerousMemberItem = styled.div`
@@ -297,6 +292,7 @@ const DangerousMemberItem = styled.div`
 const SortContainer = styled.div`
     display : flex;
     justify-content : space-between;
+    margin-top : -5.5px;
 `
 const SortBtnBox = styled.div`
     display : flex;
@@ -305,7 +301,7 @@ const SortBtnBox = styled.div`
 
 const Title = styled.h2`
     color : #245671;
-    font-size : 26px;
+    font-size : 22px;
     margin-right : 20px;
 `
 const stripeAnimation = keyframes`
@@ -322,7 +318,7 @@ const ProgressBarContainer = styled.div`
 `;
 
 const ProgressText = styled.div`
-    font-size: 16px;
+    font-size: 14px;
     margin-bottom: 8px;
 `;
 
@@ -361,12 +357,12 @@ const ProgressSegment = styled.div<{ status: ConditionType; width: number }>`
     color: white;
     text-align: center;
     line-height: 20px;
-    font-size: 14px;
+    font-size: 13px;
 `;
 
 
 const ScrollContainer = styled.div`
-    height : 75%;
+    height : 72%;
     overflow-y : auto;
     margin-top : 10px;
 `
@@ -386,7 +382,7 @@ const UserCard = styled.div<UserCardProps>`
     flex-direction: column;
     justify-content: center;
     align-items: center;
-    padding: 10px 20px;
+    padding: 5px 15px;
     border-radius: 8px;
     background-color: ${props => {
         switch (props.status) {
@@ -412,28 +408,28 @@ const UserCard = styled.div<UserCardProps>`
 `;
 
 const UserName = styled.div`
-    font-size: 18px;
+    font-size: 15px;
     font-weight: bold;
 `;
 
 const Status = styled.div`
     margin-top: 5px;
-    font-size: 16px;
+    font-size: 14px;
 `;
 
 const UserId = styled.div`
     margin-top: 5px;
-    font-size: 16px;
+    font-size: 14px;
 `;
 
 const DetailButton = styled.button`
-    margin-top: 15px;
+    margin-top: 10px;
     padding: 8px 16px;
     background-color: rgba(255, 255, 255, 0.2);
     border: none;
     border-radius: 8px;
     color: white;
-    font-size : 16px;
+    font-size : 14px;
     cursor: pointer;
     text-decoration : none;
 
