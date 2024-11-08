@@ -56,7 +56,7 @@ const Button = styled.button<{isSelected : boolean}>`
     font-size : 14px;
     color : ${({ isSelected }) => (isSelected ? 'white' : '#b4b4b4')};
     cursor : pointer;
-    background-color: ${({ isSelected }) => (isSelected ? '#70BFC9' : 'transparent')};
-    border-color : #70BFC9;
+    background-color: ${({ isSelected }) => (isSelected ? '#364954' : 'transparent')};
+    border-color : #364954;
     border-style : ${({ isSelected }) => (isSelected ? 'none' : 'solid')};
 ` 

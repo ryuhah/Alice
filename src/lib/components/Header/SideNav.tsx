@@ -1,7 +1,7 @@
 import React, {useEffect, useState} from 'react'
 import styled from 'styled-components'
 import { FiTable } from "react-icons/fi"
-import { FaRegSmile } from "react-icons/fa";
+import { PiUserCircleGear } from "react-icons/pi";
 import { Link, useLocation } from 'react-router-dom';
 
 
@@ -15,7 +15,7 @@ const SideNav = () => {
             case '/member' :
                 setActiveMenu(0);
                 break;
-            case '/information':
+            case '/admin':
                 setActiveMenu(1);
                 break;
             default :
@@ -38,8 +38,8 @@ const SideNav = () => {
                 </Link>
             </IconButton>
             <IconButton>
-                <Link to = "/information">
-                    <FaRegSmile />
+                <Link to = "/admin">
+                    <PiUserCircleGear />
                 </Link>
             </IconButton>
           </IconContainer>
@@ -52,7 +52,7 @@ export default SideNav
 const SideNavContainer = styled.div`
     width : 80px;
     height :95.5%;
-    background-color : #70BFC9;
+    background-color : #364954;
     margin-left : 15px;
     margin-top : 15px;
     border-top-left-radius : 15px;
@@ -62,7 +62,7 @@ const SideNavContainer = styled.div`
 const MenuItem = styled.div<{ isActive: boolean; position: number }>`
     width: 55px;
     height: 55px;
-    background-color: #82c7d0;
+    background-color: #667a86;
     border-radius: 15px;
     display: flex;
     justify-content: center;
@@ -97,4 +97,4 @@ const IconButton = styled.div`
         color : white;
         text-decoration : none;
     }
-`; 
+`;

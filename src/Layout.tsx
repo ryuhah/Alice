@@ -6,6 +6,7 @@ import Header from './lib/components/Header/Header';
 import SideNav from './lib/components/Header/SideNav';
 import Member from './lib/components/Member/Member';
 import Information from './lib/components/Information/Information';
+import Admin from './lib/components/Admin/Admin';
 
 const Layout = () => {
   return (
@@ -15,10 +16,10 @@ const Layout = () => {
           <SideNav />
           <Routes>
               <Route path="/member" element={<Member />}></Route>
-              <Route path="/information" element={<Information />}></Route>
+              <Route path="/admin" element={<Admin />}></Route>
           </Routes>
         </MainContent>
-        <Bgimg />
+        {/* <Bgimg /> */}
       </AppContainer> 
   
   )
@@ -29,7 +30,7 @@ export default Layout
 const AppContainer = styled.div`
   display: flex;
   height: 100vh;
-  background : linear-gradient(90deg, #E7F4F5 0%, #F0F6EA 100%);
+  background-image: linear-gradient(to top, #dfe9f3 0%, white 100%);
 `;
 
 const MainContent = styled.div`
@@ -54,4 +55,4 @@ const Bgimg = styled.div`
     z-index : 1;
     background-size : cover;
     background-repeat : no-repeat;
-` 
+`

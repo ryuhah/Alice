@@ -39,8 +39,11 @@ const Login = () => {
                 <LogoImg />
             </BgBox>
             <LoginBox>
-                <Title>LOGIN</Title>
-
+              <TitleBox>
+                <TitleBIO>BIO</TitleBIO>
+                <TitleLogger>Logger</TitleLogger>
+              </TitleBox>
+              
                 <Form onSubmit={handleLogin}>
                     <Input
                         type="text"
@@ -66,7 +69,7 @@ const LoginContainer = styled.div`
 `
 
 const BgBox = styled.div`
-  background : linear-gradient(180deg, #E7F4F5 0%, #F0F6EA 100%);
+  background-image: linear-gradient(to top, #dfe9f3 0%, white 100%);
   width : 65%;
   height: 100vh;
   display : flex;
@@ -75,9 +78,9 @@ const BgBox = styled.div`
 `
 
 const LogoImg = styled.div`
-  background-image : url('/logo.png');
-  width : 200px;
-  height : 200px;
+  background-image : url('/biologger_logo.svg');
+  width : 100px;
+  height : 168px;
   background-size : cover;
   background-repeat : no-repeat;
 `
@@ -91,10 +94,32 @@ const LoginBox = styled.div`
   align-items : center;
 `
 
-const Title = styled.h1`
-  margin-top : -80px;
-  font-size : 44px;
-  color : #245671;
+const TitleBox = styled.div`
+  display : flex;
+  gap : 15px;
+`
+
+const TitleFont = styled.span`
+    @font-face {
+    font-family: 'GmarketSansMedium';
+    src: url('https://fastly.jsdelivr.net/gh/projectnoonnu/noonfonts_2001@1.1/GmarketSansMedium.woff') format('woff');
+    font-weight: normal;
+    font-style: normal;
+    }
+    font-family: 'yg-jalnan', sans-serif;
+    
+    font-size : 40px;
+
+`
+
+const TitleBIO = styled(TitleFont)`
+    color : #364954;
+    font-weight : bold;
+`
+
+const TitleLogger = styled(TitleFont)`
+    color : #364954;
+    font-weight : light;
 `
 
 const Form = styled.form`
@@ -112,7 +137,7 @@ const Input = styled.input`
   border-radius : 10px;
 
   &:focus {
-    border : 3px solid #245671;
+    border : 3px solid #364954;
     outline: none;
   }
 `
@@ -122,12 +147,12 @@ const LoginButton = styled.button`
   padding : 20px;
   font-size : 20px;
   color : white;
-  background-color : #245671;
+  background-color : #364954;
   border : none;
   border-radius : 10px;
   cursor : pointer;
   
   &:hover {
-    background-color : #1d4a5e;
+    background-color : #4b5b6e;
   }
 ` 

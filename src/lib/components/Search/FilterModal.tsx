@@ -58,7 +58,7 @@ const ModalOverlay = styled.div`
     display: flex;
     justify-content: center;
     align-items: center;
-    background: rgba(0, 0, 0, 0.1);
+    background: rgba(0, 0, 0, 0.5);
     z-index :3;
 `;
 
@@ -68,7 +68,6 @@ const ModalContainer = styled.div`
     background : white;
     border-radius : 20px;
     width : 380px;
-    box-shadow: #8BC1DE 0px 1px 2px 0px, #8BC1DE 0px 2px 6px 2px;
     padding : 15px 20px;
 
 `
@@ -109,7 +108,7 @@ const Filter = styled.button<{isSelected : boolean}>`
     color:  ${({ isSelected }) => (isSelected ? '#000000' : '#B4B4B4')};
     cursor: pointer;
     background-color: transparent;
-    border-color: ${({ isSelected }) => (isSelected ? '#70BFC9' : '#B4B4B4')};
+    border-color: ${({ isSelected }) => (isSelected ? '#364954' : '#B4B4B4')};
     border-style: solid;
 `
 
@@ -130,7 +129,7 @@ const ApplyButton = styled.button`
 `
 
 const ApplyBtn = styled(ApplyButton)`
-    background-color : #70BFC9;
+    background-color : #364954;
     color : white;
 `
 

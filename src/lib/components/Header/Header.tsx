@@ -5,8 +5,10 @@ const Header = () => {
   return (
     <div>
         <HeaderContainer>
-            <TitleNaju>나주시</TitleNaju>
-            <Title>건강 모니터링 시스템</Title>
+            <LogoImg/>
+            <TitleBIO>BIO</TitleBIO>
+            <TitleLogger>Logger</TitleLogger>
+            
         </HeaderContainer>
     </div>
   )
@@ -27,23 +29,32 @@ const HeaderContainer = styled.header`
     z-index : 2;
 `
 
+const LogoImg = styled.div`
+  background-image : url('/biologger_logo.png');
+  width : 18px;
+  height : 30px;
+  background-size : cover;
+  background-repeat : no-repeat;
+  margin-left : 50px;
+`
+
 const TitleFont = styled.span`
     @font-face {
-    font-family: 'yg-jalnan';
-    src: url('https://fastly.jsdelivr.net/gh/projectnoonnu/noonfonts_four@1.2/JalnanOTF00.woff') format('woff');
+    font-family: 'GmarketSansMedium';
+    src: url('https://fastly.jsdelivr.net/gh/projectnoonnu/noonfonts_2001@1.1/GmarketSansMedium.woff') format('woff');
     font-weight: normal;
     font-style: normal;
     }
     font-family: 'yg-jalnan', sans-serif;
+    color : #364954;
     font-size : 25px;
 
 `
 
-const TitleNaju = styled(TitleFont)`
-    color : #F4B941;
-    margin-left : 50px;
+const TitleBIO = styled(TitleFont)`
+    font-weight : bold;
 `
 
-const Title = styled(TitleFont)`
-    color : #245671 
+const TitleLogger = styled(TitleFont)`
+    font-weight : light;
 `

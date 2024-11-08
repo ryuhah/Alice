@@ -7,6 +7,7 @@ import SortBtn from '../Search/SortBtn';
 import FilterBtn from '../Search/FilterBtn';
 import instance from '../../../axios';
 import { initMembers, MemberSummary, patchMembers } from './types';
+import MemberModal from './MemberMotal';
 
 const Member = () => {
     const [members, setMembers] = useState<MemberSummary[]>([])
@@ -15,6 +16,8 @@ const Member = () => {
     const itemsPerPage = 10;
     const [selectedFilters, setSelectedFilters] = useState<string[]>([])
     const [searchTerm, setSearchTerm] = useState<string>('');
+    const [selectedUser, setSelectedUser] = useState<MemberSummary | undefined>(undefined);
+    const [isModalOpen, setIsModalOpen] = useState(false);
     // TODO: 기본정보 받아오기 -> 생체데이터 페이징 형태로 받아오기 
     useEffect(() => {
         const fatchMembers = async () => {
@@ -73,27 +76,39 @@ const Member = () => {
     const handleNextPage = () => currentPage < Math.ceil(filteredMembers.length / itemsPerPage) && setCurrentPage(currentPage + 1);
     const handlePrevPage = () => currentPage > 1 && setCurrentPage(currentPage - 1);
 
-    const csvHeaders = [
-        { label: "No.", key: "member.id" },
-        { label: "ID", key: "member.loginId" },
-        { label: "이름", key: "member.name" },
-        { label: "휴대폰", key: "member.phoneNumber" },
-        { label: "위치", key: "member.gpsLocation" },
-        { label: "스트레스", key: "vital.stress" },
-        { label: "우울증", key: "vital.depress" },
-        { label: "심박이벤트여부", key: "vital.abnormalHr" },
-        { label: "혈중산소포화도", key: "vital.spo2" },
-        { label: "심박수", key: "vital.hr" },
-        { label: "활동량", key: "vital.step" }
-    ]
+    // Row 클릭
+    const handleRowClick = (member : MemberSummary) => {
+        setSelectedUser(member);
+        setIsModalOpen(true);
+    }
 
-    const getFormattedDate = () => {
-        const today = new Date();
-        const year = today.getFullYear();
-        const month = String(today.getMonth() + 1).padStart(2, '0');
-        const day = String(today.getDate()).padStart(2, '0');
-        return `${year}-${month}-${day}`
-    };
+    // 모달 닫기
+    const closeModal = () => {
+        setSelectedUser(undefined);
+        setIsModalOpen(false);
+    }
+
+    // const csvHeaders = [
+    //     { label: "No.", key: "member.id" },
+    //     { label: "ID", key: "member.loginId" },
+    //     { label: "이름", key: "member.name" },
+    //     { label: "휴대폰", key: "member.phoneNumber" },
+    //     { label: "위치", key: "member.gpsLocation" },
+    //     { label: "스트레스", key: "vital.stress" },
+    //     { label: "우울증", key: "vital.depress" },
+    //     { label: "심박이벤트여부", key: "vital.abnormalHr" },
+    //     { label: "혈중산소포화도", key: "vital.spo2" },
+    //     { label: "심박수", key: "vital.hr" },
+    //     { label: "활동량", key: "vital.step" }
+    // ]
+
+    // const getFormattedDate = () => {
+    //     const today = new Date();
+    //     const year = today.getFullYear();
+    //     const month = String(today.getMonth() + 1).padStart(2, '0');
+    //     const day = String(today.getDate()).padStart(2, '0');
+    //     return `${year}-${month}-${day}`
+    // };
 
 
     return (
@@ -111,48 +126,53 @@ const Member = () => {
                 </SearchBox>
             </HeaderContainer>
             <SortContainer>
-                <CSVLinkBtn
+                {/* <CSVLinkBtn
                     data={filteredMembers}
                     headers={csvHeaders}
                     filename={`사용자정보_${getFormattedDate()}.csv`}>
                     엑셀 다운로드
-                </CSVLinkBtn>
+                </CSVLinkBtn> */}
                 <SortBtn label='이름순' onSort={handleSortByName} />
             </SortContainer>
             <TableHeader>
                 <div style={{ width: "10%" }}>No.</div>
                 <div style={{ width: "10%" }}>ID</div>
                 <div style={{ width: "10%" }}>이름</div>
-                <div style={{ width: "15%" }}>휴대폰</div>
-                <div style={{ width: "10%" }}>위치</div>
-                <div style={{ width: "10%" }}>스트레스</div>
-                <div style={{ width: "10%" }}>우울증</div>
-                <div style={{ width: "15%" }}>심박이벤트여부</div>
+                <div style={{ width: "10%" }}>휴대폰</div>
+                <div style={{ width: "10%" }}>갈망정도</div>
+                <div style={{ width: "10%" }}>갈망상황</div>
+                <div style={{ width: "10%" }}>측정여부</div>
+                {/* <div style={{ width: "15%" }}>심박이벤트여부</div>
                 <div style={{ width: "15%" }}>혈중산소포화도</div>
                 <div style={{ width: "10%" }}>심박수</div>
-                <div style={{ width: "10%" }}>활동량</div>
+                <div style={{ width: "10%" }}>활동량</div> */}
             </TableHeader>
             <hr />
             <TableBody>
                 {currentItems.map((item, index) => {
                     console.log("Loaded members data2:", members);
                     return (
-                        <TableRow key={index}>
+                        <TableRow key={index} onClick={()=> handleRowClick(item)}>
                             <div style={{ width: "10%" }}>{item.id}</div>
                             <div style={{ width: "10%" }}>{item.loginId}</div>
                             <div style={{ width: "10%" }}>{item.name}</div>
-                            <div style={{ width: "15%" }}>{item.phoneNumber}</div>
-                            <div style={{ width: "10%" }}>{item.gpsLocation}</div>
-                            <div style={{ width: "10%" }}>{item?.stress}</div>
-                            <div style={{ width: "10%" }}>{item?.depress}</div>
-                            <div style={{ width: "15%" }}>{item?.abnormalHr}</div>
+                            <div style={{ width: "10%" }}>{item.phoneNumber}</div>
+                            <div style={{ width: "10%" }}>0</div>
+                            <div style={{ width: "10%" }}>0</div>
+                            <div style={{ width: "10%" }}>미측정</div>
+                            {/* <div style={{ width: "15%" }}>{item?.abnormalHr}</div>
                             <div style={{ width: "15%" }}>{item?.spo2}%</div>
                             <div style={{ width: "10%" }}>{item?.hr}</div>
-                            <div style={{ width: "10%" }}>{item?.step}</div>
+                            <div style={{ width: "10%" }}>{item?.step}</div> */}
                         </TableRow>
                     )
                 })}
             </TableBody>
+            <MemberModal
+                isOpen={isModalOpen}
+                onClose={closeModal}
+                user={selectedUser}
+            />
             <Pagination>
                 <PageBtn
                     onClick={handlePrevPage}
@@ -201,7 +221,7 @@ const SearchBox = styled.div`
 
 const SortContainer = styled.div`
     display : flex;
-    justify-content : space-between;
+    justify-content : end;
 `
 
 const CSVLinkBtn = styled(CSVLink)`
@@ -219,7 +239,7 @@ const CSVLinkBtn = styled(CSVLink)`
 `
 
 const Title = styled.h2`
-    color : #245671;
+    color : #364954;
     font-size : 22px;
 `
 
@@ -242,6 +262,7 @@ const TableRow = styled.div`
     text-align : center;
     padding : 9.5px 0;
     font-size : 14px;   
+    cursor : pointer;
 `
 
 const Pagination = styled.div`
@@ -256,13 +277,13 @@ const PageBtn = styled.button<{ isActive?: boolean }>`
     height : 30px;
     margin: 0 3px;
     border: none;
-    background-color: ${({ isActive }) => (isActive ? '#70BFC9' : '#f1f1f1')};
+    background-color: ${({ isActive }) => (isActive ? '#364954' : '#f1f1f1')};
     color: ${({ isActive }) => (isActive ? 'white' : 'black')};
     border-radius: 5px;
     cursor: pointer;
 
     &:hover {
-        background-color: #B1DFDC;
+        background-color: #4b5b6e;
         color: white;
     }
     

@@ -36,9 +36,9 @@ const SortBtnContainer = styled.button`
     padding : 0 15px;
     border-radius : 20px;
     font-size : 14px;
-    color : #245671;
+    color : #364954;
     cursor : pointer;
     background-color: transparent;
-    border-color : #70BFC9;
+    border-color : #364954;
     border-style : solid; 
 ` 
