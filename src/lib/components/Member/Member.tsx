@@ -2,7 +2,6 @@ import React, { useEffect, useState } from 'react'
 import styled from 'styled-components';
 import SearchBar from '../Search/SearchBar'
 import { IoIosArrowBack, IoIosArrowForward } from "react-icons/io";
-import { CSVLink } from "react-csv";
 import SortBtn from '../Search/SortBtn';
 import FilterBtn from '../Search/FilterBtn';
 import instance from '../../../axios';
@@ -88,29 +87,6 @@ const Member = () => {
         setIsModalOpen(false);
     }
 
-    // const csvHeaders = [
-    //     { label: "No.", key: "member.id" },
-    //     { label: "ID", key: "member.loginId" },
-    //     { label: "이름", key: "member.name" },
-    //     { label: "휴대폰", key: "member.phoneNumber" },
-    //     { label: "위치", key: "member.gpsLocation" },
-    //     { label: "스트레스", key: "vital.stress" },
-    //     { label: "우울증", key: "vital.depress" },
-    //     { label: "심박이벤트여부", key: "vital.abnormalHr" },
-    //     { label: "혈중산소포화도", key: "vital.spo2" },
-    //     { label: "심박수", key: "vital.hr" },
-    //     { label: "활동량", key: "vital.step" }
-    // ]
-
-    // const getFormattedDate = () => {
-    //     const today = new Date();
-    //     const year = today.getFullYear();
-    //     const month = String(today.getMonth() + 1).padStart(2, '0');
-    //     const day = String(today.getDate()).padStart(2, '0');
-    //     return `${year}-${month}-${day}`
-    // };
-
-
     return (
         <MemberContainer>
             <HeaderContainer>
@@ -126,12 +102,6 @@ const Member = () => {
                 </SearchBox>
             </HeaderContainer>
             <SortContainer>
-                {/* <CSVLinkBtn
-                    data={filteredMembers}
-                    headers={csvHeaders}
-                    filename={`사용자정보_${getFormattedDate()}.csv`}>
-                    엑셀 다운로드
-                </CSVLinkBtn> */}
                 <SortBtn label='이름순' onSort={handleSortByName} />
             </SortContainer>
             <TableHeader>
@@ -142,10 +112,6 @@ const Member = () => {
                 <div style={{ width: "10%" }}>갈망정도</div>
                 <div style={{ width: "10%" }}>갈망상황</div>
                 <div style={{ width: "10%" }}>측정여부</div>
-                {/* <div style={{ width: "15%" }}>심박이벤트여부</div>
-                <div style={{ width: "15%" }}>혈중산소포화도</div>
-                <div style={{ width: "10%" }}>심박수</div>
-                <div style={{ width: "10%" }}>활동량</div> */}
             </TableHeader>
             <hr />
             <TableBody>
@@ -160,10 +126,6 @@ const Member = () => {
                             <div style={{ width: "10%" }}>0</div>
                             <div style={{ width: "10%" }}>0</div>
                             <div style={{ width: "10%" }}>미측정</div>
-                            {/* <div style={{ width: "15%" }}>{item?.abnormalHr}</div>
-                            <div style={{ width: "15%" }}>{item?.spo2}%</div>
-                            <div style={{ width: "10%" }}>{item?.hr}</div>
-                            <div style={{ width: "10%" }}>{item?.step}</div> */}
                         </TableRow>
                     )
                 })}
@@ -222,20 +184,6 @@ const SearchBox = styled.div`
 const SortContainer = styled.div`
     display : flex;
     justify-content : end;
-`
-
-const CSVLinkBtn = styled(CSVLink)`
-    text-decoration: none;
-    padding: 10px;
-    border-radius: 10px;
-    background-color: #70BFC9;
-    color: white;
-    cursor: pointer;
-    font-size : 14px;
-    
-    &:hover {
-        background-color: #B1DFDC;
-    }
 `
 
 const Title = styled.h2`

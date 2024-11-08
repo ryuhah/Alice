@@ -61,12 +61,12 @@ const CloseButton = styled.button`
   margin-top: 20px;
   padding: 10px 20px;
   border: none;
-  background-color: #70BFC9;
+  background-color: #364954;
   color: white;
   border-radius: 5px;
   cursor: pointer;
 
   &:hover {
-    background-color: #B1DFDC;
+    background-color: #4b5b6e;
   }
 `;
