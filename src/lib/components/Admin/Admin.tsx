@@ -17,7 +17,6 @@ const Admin = () => {
     const [currentAction, setCurrentAction] = useState<ActionType>(null);
 
     const handleOpenModal = () => setIsAddUserModalOpen(true);
-    const handleCloseModal = () => setIsAddUserModalOpen(false);
 
     const openDeleteModal = (id: number, name: string) => {
         setSelectedUser({ id, name });

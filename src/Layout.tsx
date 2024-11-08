@@ -5,7 +5,6 @@ import styled from 'styled-components';
 import Header from './lib/components/Header/Header';
 import SideNav from './lib/components/Header/SideNav';
 import Member from './lib/components/Member/Member';
-import Information from './lib/components/Information/Information';
 import Admin from './lib/components/Admin/Admin';
 
 const Layout = () => {
@@ -19,7 +18,6 @@ const Layout = () => {
               <Route path="/admin" element={<Admin />}></Route>
           </Routes>
         </MainContent>
-        {/* <Bgimg /> */}
       </AppContainer> 
   
   )
@@ -43,16 +41,4 @@ const MainContent = styled.div`
   box-shadow: #8BC1DE 0px 1px 2px 0px, #8BC1DE 0px 2px 6px 2px;
   z-index : 2;
   
-`
-
-const Bgimg = styled.div`
-    background-image : url('/bgimg.png');
-    width : 850px;
-    height : 200px;
-    position : absolute;
-    bottom : 0;
-    right : 0;
-    z-index : 1;
-    background-size : cover;
-    background-repeat : no-repeat;
 `

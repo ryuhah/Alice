@@ -21,11 +21,6 @@ const AddUserModal: React.FC<AddUserModalProps> = ({ isOpen, onClose, onConfirm 
         setUserData({ ...userData, [name]: value });
     };
 
-    const handleSubmit = () => {
-        console.log('새 유저 추가:', userData);
-        onClose();
-    };
-
     return (
         <Overlay>
             <Modal>
