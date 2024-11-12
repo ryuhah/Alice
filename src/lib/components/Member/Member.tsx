@@ -8,12 +8,12 @@ import instance from '../../../axios';
 import { initMembers, MemberSummary, patchMembers } from './types';
 import MemberModal from './MemberMotal';
 
-type ConditionType = 'NOT_MEASUREMENT' | 'MEASURING' ;
+type ConditionType = 'NOT_MEASUREMENT' | 'MEASURING';
 
 const conditionLabels: Record<ConditionType, string> = {
     NOT_MEASUREMENT: '미측정',
     MEASURING: '측정'
-}; 
+};
 
 const Member = () => {
     const [members, setMembers] = useState<MemberSummary[]>([])
@@ -26,7 +26,7 @@ const Member = () => {
     const [isModalOpen, setIsModalOpen] = useState(false);
     // TODO: 기본정보 받아오기 -> 생체데이터 페이징 형태로 받아오기 
     useEffect(() => {
-        const fatchMembers = async () => {
+        const fatchInfo = async () => {
             try {
                 const response = await instance.get('/bio/admin/members/info')
                 const members: MemberSummary[] = initMembers(response.data);
@@ -38,7 +38,7 @@ const Member = () => {
             }
         }
 
-        const fatchVitals = async () => {
+        const fatchDetail = async () => {
             try {
                 const response = await instance.get('/bio/admin/members/info/detail')
                 const members: MemberSummary[] = patchMembers(response.data.memberDetails);
@@ -50,8 +50,11 @@ const Member = () => {
             }
         }
 
-        fatchMembers()
-        fatchVitals()
+        fatchInfo()
+        setTimeout(fatchDetail, 500);
+
+        const intervalId = setInterval(fatchDetail, 10 * 60 * 1000); // 10분마다 호출
+        return () => clearInterval(intervalId)
     }, [])
 
     // filter
@@ -83,7 +86,7 @@ const Member = () => {
     const handlePrevPage = () => currentPage > 1 && setCurrentPage(currentPage - 1);
 
     // Row 클릭
-    const handleRowClick = (member : MemberSummary) => {
+    const handleRowClick = (member: MemberSummary) => {
         setSelectedUser(member);
         setIsModalOpen(true);
     }
@@ -125,7 +128,7 @@ const Member = () => {
                 {currentItems.map((item, index) => {
                     console.log("Loaded members data2:", members);
                     return (
-                        <TableRow key={index} onClick={()=> handleRowClick(item)}>
+                        <TableRow key={index} onClick={() => handleRowClick(item)}>
                             <div style={{ width: "10%" }}>{item.id}</div>
                             <div style={{ width: "10%" }}>{item.loginId}</div>
                             <div style={{ width: "10%" }}>{item.name}</div>
