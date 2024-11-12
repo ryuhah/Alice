@@ -4,6 +4,7 @@ import AddUserModal from './AddUserModal';
 import DeleteConfirmModal from './DeleteUserModal';
 import AuthModal from './AuthModal';
 import instance from '../../../axios';
+import { AxiosError } from 'axios';
 import { AdminInfo, MemberInfo, ActionType, initMembers, initAdmins } from './types';
 
 const Admin = () => {
@@ -70,7 +71,7 @@ const Admin = () => {
             } else if (currentAction === 'deleteAdmin' && selectedUser) {
                 await handleDeleteAdmin(selectedUser.id);
             }
-    
+
             closeModals(); // 작업 후 모달 닫기
         } catch (error) {
             console.error('후속 작업 실패:', error);
@@ -101,25 +102,34 @@ const Admin = () => {
                 phoneNumber: userData.phoneNum,
                 age: Number(userData.age)
             });
-            setMembers((prev) => [
-                ...prev,
-                { ...userData, id: Date.now(), phoneNumber: userData.phoneNum, age: Number(userData.age) }
-            ]);
-            console.log("유저 추가 완료");
+
+            alert("유저 추가에 성공하였습니다.\n내용이 변경되었으니 다시 로그인해주세요."); // 추가된 부분
+            window.location.href = '/login'
+
         } catch (error) {
             console.log("유저 추가 실패:", error);
+            // 서버에서 반환된 에러 메시지가 있는 경우, 해당 메시지를 표시
+            const axiosError = error as AxiosError;
+            const errorMessage = axiosError.response?.data || "";
+            alert(`유저 추가에 실패했습니다.\n${errorMessage}`);
         }
     };
 
-
     const handleDeleteUser = async (userId: number) => {
         try {
-            // await instance.delete('/bio/auth/members/delete', { data: { id: userId } });
-            // setMembers((prev) => prev.filter((member) => member.id !== userId));
-            // console.log(`유저 ${userId} 삭제 완료`);
-            // setSelectedUser(null); 
+            await instance.delete(`/bio/auth/members/delete/${userId}`);
+            setMembers((prev) => prev.filter((member) => member.id !== userId));
+            console.log(`유저 ${userId} 삭제 완료`);
+
+            alert("유저 삭제에 성공하였습니다.\n내용이 변경되었으니 다시 로그인해주세요.");
+            window.location.href = '/login'
+
+            setSelectedUser(null);
         } catch (error) {
             console.log(`유저 삭제 실패: ${error}`);
+            const axiosError = error as AxiosError;
+            const errorMessage = axiosError.response?.data || "";
+            alert(`유저 삭제에 실패했습니다.\n${errorMessage}`);
         }
     };
 
@@ -136,7 +146,6 @@ const Admin = () => {
 
     const handleAuthSuccess = () => {
         console.log('인증 성공! 후속 작업을 수행합니다.');
-        // 인증 성공 시 수행할 추가 작업 (예: 페이지 이동, 상태 업데이트 등)
     };
 
     useEffect(() => {
@@ -164,7 +173,7 @@ const Admin = () => {
         fatchAdmins();
         fatchMembers();
     }, [])
-
+ 
     return (
         <AdminContainer>
             <HeaderContainer>
@@ -211,7 +220,7 @@ const Admin = () => {
                     </AdminScrollContainer>
 
                 </TableContainer>
-                
+
             </AdminInfoContainer>
             <hr />
             <Section>
@@ -264,7 +273,7 @@ const Admin = () => {
                 onClose={() => setIsDeleteModalOpen(false)}
                 onConfirm={requestAuthForDeleteUser} // 인증 요청 전달
                 user={selectedUser}
-                title = {currentAction === 'deleteAdmin' ? "관리자 삭제" : "유저 삭제"}
+                title={currentAction === 'deleteAdmin' ? "관리자 삭제" : "유저 삭제"}
             />
 
             <AuthModal
