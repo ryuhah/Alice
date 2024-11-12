@@ -47,7 +47,7 @@ instance.interceptors.response.use(
 
         if (status === 401 && message === "사용자 검증에 실패했습니다") {
             try {
-                const res = await instance.post("/auth/refresh", { token: localStorage.getItem('refreshToken') });
+                const res = await instance.post("/bio/auth/refresh", { token: localStorage.getItem('refreshToken') });
 
                 if (res.data.reAuthenticationRequired) {
                     throw new Error("토큰 재발급 실패");
@@ -62,7 +62,7 @@ instance.interceptors.response.use(
                 }
             } catch (err) {
                 console.error("재발급 중 오류:", err);
-                await instance.post("/auth/logout", { token: localStorage.getItem('refreshToken') });
+                await instance.post("/bio/auth/logout", { token: localStorage.getItem('refreshToken') });
                 alert("로그인 정보가 만료되었습니다. 다시 로그인 해주세요.");
                 localStorage.clear();
                 window.location.replace('/');

@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import styled from 'styled-components';
 import instance from '../../../axios';
 
@@ -14,6 +14,13 @@ const AuthModal: React.FC<AuthModalProps> = ({ isOpen, onClose, onConfirm, onAut
     const [id, setId] = useState('');
     const [password, setPassword] = useState('');
 
+    useEffect(() => {
+        if (!isOpen) {
+            setId('')
+            setPassword('')
+        }
+    }, [isOpen]);
+
     if (!isOpen) return null;
 
     const handleConfirm = async () => {
@@ -28,7 +35,7 @@ const AuthModal: React.FC<AuthModalProps> = ({ isOpen, onClose, onConfirm, onAut
             localStorage.setItem('accessToken', accessToken);
             localStorage.setItem('refreshToken', refreshToken);
 
-            onAuthSuccess(); // 인증 성공 콜백 호출
+            onConfirm(id, password);
             onClose(); // 모달 닫기
         } catch (error) {
             console.error('로그인 오류:', error);
@@ -41,7 +48,7 @@ const AuthModal: React.FC<AuthModalProps> = ({ isOpen, onClose, onConfirm, onAut
             <Modal>
                 <h3>관리자 인증</h3>
                 <Label>
-                    <span>ID</span>
+                    <strong>ID</strong>
                     <Input 
                         type="text" 
                         value={id} 
@@ -50,7 +57,7 @@ const AuthModal: React.FC<AuthModalProps> = ({ isOpen, onClose, onConfirm, onAut
                     />
                 </Label>
                 <Label>
-                    <span>비밀번호</span>
+                    <strong>비밀번호</strong>
                     <Input 
                         type="password" 
                         value={password} 

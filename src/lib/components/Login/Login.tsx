@@ -11,7 +11,7 @@ const Login = () => {
 
     const handleLogin = (event: React.FormEvent<HTMLFormElement>) => {
         event.preventDefault();
-        instance.post("/auth/admin/login", {
+        instance.post("/bio/auth/admin/login", {
             // loginId: "admin1",
             // password: "12341234"
             loginId: username,

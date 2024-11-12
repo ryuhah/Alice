@@ -6,15 +6,16 @@ interface DeleteConfirmModalProps {
     onClose: () => void;
     onConfirm: () => void; 
     user: { id: number; name: string } | null;
+    title : string
 }
 
-const DeleteConfirmModal: React.FC<DeleteConfirmModalProps> = ({ isOpen, onClose,onConfirm, user }) => {
+const DeleteConfirmModal: React.FC<DeleteConfirmModalProps> = ({ isOpen, onClose,onConfirm, user, title }) => {
     if (!isOpen || !user) return null;
 
     return (
         <Overlay>
             <Modal>
-                <h3>유저 삭제</h3>
+                <h3>{title}</h3>
                 <p>
                     ID: <strong>{user.id}</strong>, 이름: <strong>{user.name}</strong>님을 
                 </p>

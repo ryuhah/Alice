@@ -8,6 +8,13 @@ import instance from '../../../axios';
 import { initMembers, MemberSummary, patchMembers } from './types';
 import MemberModal from './MemberMotal';
 
+type ConditionType = 'NOT_MEASUREMENT' | 'MEASURING' ;
+
+const conditionLabels: Record<ConditionType, string> = {
+    NOT_MEASUREMENT: '미측정',
+    MEASURING: '측정'
+}; 
+
 const Member = () => {
     const [members, setMembers] = useState<MemberSummary[]>([])
     const [filteredMembers, setFilteredMembers] = useState<MemberSummary[]>([]);
@@ -21,7 +28,7 @@ const Member = () => {
     useEffect(() => {
         const fatchMembers = async () => {
             try {
-                const response = await instance.get('/admin/members/info')
+                const response = await instance.get('/bio/admin/members/info')
                 const members: MemberSummary[] = initMembers(response.data);
                 setMembers(members)
                 setFilteredMembers(members)
@@ -33,11 +40,11 @@ const Member = () => {
 
         const fatchVitals = async () => {
             try {
-                const response = await instance.get('/admin/members/info/detail')
+                const response = await instance.get('/bio/admin/members/info/detail')
                 const members: MemberSummary[] = patchMembers(response.data.memberDetails);
                 setMembers(members)
                 setFilteredMembers(members)
-                console.log("Loaded members data:", response.data.memberDetails);
+                console.log("Loaded members data_patch:", response.data.memberDetails);
             } catch (error) {
                 console.log("전체회원 상세정보 조회 실패 : " + error)
             }
@@ -123,9 +130,9 @@ const Member = () => {
                             <div style={{ width: "10%" }}>{item.loginId}</div>
                             <div style={{ width: "10%" }}>{item.name}</div>
                             <div style={{ width: "10%" }}>{item.phoneNumber}</div>
-                            <div style={{ width: "10%" }}>0</div>
-                            <div style={{ width: "10%" }}>0</div>
-                            <div style={{ width: "10%" }}>미측정</div>
+                            <div style={{ width: "10%" }}>{item.degree}</div>
+                            <div style={{ width: "10%" }}>{item.situation}</div>
+                            <div style={{ width: "10%" }}>{conditionLabels[item.measureState as ConditionType]}</div>
                         </TableRow>
                     )
                 })}

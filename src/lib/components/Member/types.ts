@@ -1,28 +1,29 @@
 
-export interface MemberSummary extends MemberVitals {
+export interface MemberSummary extends MemberServey {
     id: number,
     loginId: string,
     name: string,
     phoneNumber: string,
-    supervisorPhoneNumber: string,
-    gpsLocation: string
+    measureState:string
 }
  
-interface MemberVitals {
-    stress?: number,
-    depress?: number,
-    abnormalHr?: number,
-    spo2?: number,
-    hr?: number,
-    step?: number,
-    recovery?: number,
-    skinTemp?: number,
-    bodyTemp?: number,
+interface MemberServey {
+    degree: number,
+    situation: number
 }
 
 interface MemberDetails {
     member: MemberSummary,
-    vital: MemberVitals
+    survey: MemberServey,
+    measureState:string
+}
+
+export interface FileList {
+    name: string,
+    loginId: string,
+    date: string,
+    size: string,
+    fileName: string
 }
 
 export function initMembers(data: MemberSummary[]): MemberSummary[] {
@@ -31,17 +32,9 @@ export function initMembers(data: MemberSummary[]): MemberSummary[] {
         loginId: member.loginId,
         name: member.name,
         phoneNumber: member.phoneNumber,
-        supervisorPhoneNumber: member.supervisorPhoneNumber,
-        gpsLocation: member.gpsLocation,
-        stress: 0,
-        depress: 0,
-        abnormalHr: 0,
-        spo2: 0,
-        hr: 0,
-        step: 0,
-        recovery: 0,
-        skinTemp: 0,
-        bodyTemp: 0,
+        degree: member.degree,
+        situation: member.situation,
+        measureState : member.measureState
     }));
 }
 
@@ -51,16 +44,8 @@ export function patchMembers(details: MemberDetails[]): MemberSummary[] {
         loginId: data.member.loginId,
         name: data.member.name,
         phoneNumber: data.member.phoneNumber,
-        supervisorPhoneNumber: data.member.supervisorPhoneNumber,
-        gpsLocation: data.member.gpsLocation,
-        stress: data.vital.stress,
-        depress: data.vital.depress,
-        abnormalHr: data.vital.abnormalHr,
-        spo2: data.vital.spo2,
-        hr: data.vital.hr,
-        step: data.vital.step,
-        recovery: data.vital.recovery,
-        skinTemp: data.vital.skinTemp,
-        bodyTemp: data.vital.bodyTemp
+        degree : data.survey.degree,
+        situation : data.survey.situation,
+        measureState : data.measureState
     }));
 }
