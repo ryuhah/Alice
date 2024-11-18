@@ -9,7 +9,6 @@ import { initMembers, MemberSummary, patchMembers } from './types';
 import MemberModal from './MemberModal';
 
 type ConditionType = 'NOT_MEASUREMENT' | 'MEASURING';
-
 const conditionLabels: Record<ConditionType, string> = {
     NOT_MEASUREMENT: '미측정',
     MEASURING: '측정'
@@ -86,10 +85,18 @@ const Member = () => {
     const handlePrevPage = () => currentPage > 1 && setCurrentPage(currentPage - 1);
 
     // Row 클릭
-    const handleRowClick = (member: MemberSummary) => {
+    const handleRowClick = async (member: MemberSummary) => {
         setSelectedUser(member);
         setIsModalOpen(true);
-    }
+    
+        try {
+            // 설문 API 호출
+            const response = await instance.get(`/bio/admin/members/info/survey/${member.id}`);
+            console.log("Survey data for member:", response.data);
+        } catch (error) {
+            console.error("설문 조회 실패:", error);
+        }
+    };
 
     // 모달 닫기
     const closeModal = () => {
@@ -115,13 +122,15 @@ const Member = () => {
                 <SortBtn label='이름순' onSort={handleSortByName} />
             </SortContainer>
             <TableHeader>
-                <div style={{ width: "10%" }}>No.</div>
+                <div style={{ width: "5%" }}>No.</div>
                 <div style={{ width: "10%" }}>ID</div>
                 <div style={{ width: "10%" }}>이름</div>
                 <div style={{ width: "10%" }}>휴대폰</div>
+                <div style={{ width: "15%" }}>설문시간</div>
                 <div style={{ width: "10%" }}>갈망정도</div>
                 <div style={{ width: "20%" }}>갈망상황</div>
                 <div style={{ width: "10%" }}>측정여부</div>
+                <div style={{ width: "15%" }}>측정시간</div>
             </TableHeader>
             <hr />
             <TableBody>
@@ -129,13 +138,16 @@ const Member = () => {
                     console.log("Loaded members data2:", members);
                     return (
                         <TableRow key={index} onClick={() => handleRowClick(item)}>
-                            <div style={{ width: "10%" }}>{item.id}</div>
+                            <div style={{ width: "5%" }}>{item.id}</div>
                             <div style={{ width: "10%" }}>{item.loginId}</div>
                             <div style={{ width: "10%" }}>{item.name}</div>
                             <div style={{ width: "10%" }}>{item.phoneNumber}</div>
+                            <div style={{ width: "15%" }}>{item.surveyTs}</div>
                             <div style={{ width: "10%" }}>{item.degree}</div>
                             <div style={{ width: "20%" }}>{item.situation}</div>
+                            
                             <div style={{ width: "10%" }}>{conditionLabels[item.measureState as ConditionType]}</div>
+                            <div style={{ width: "15%" }}>{item.uploadTs}</div>
                         </TableRow>
                     )
                 })}

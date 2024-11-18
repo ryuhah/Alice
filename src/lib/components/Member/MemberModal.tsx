@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import styled from 'styled-components';
-import { IoIosArrowBack, IoIosArrowForward} from "react-icons/io";
+import { IoIosArrowBack, IoIosArrowForward, IoIosArrowUp, IoIosArrowDown } from "react-icons/io";
 import instance from '../../../axios';
 import { FileList } from './types';
 
@@ -20,6 +20,7 @@ const MemberModal: React.FC<ModalProps> = ({ isOpen, onClose, user }) => {
   const [loading, setLoading] = useState(false);
   const [fileList, setFileList] = useState<FileList[]>([]);
   const [currentPage, setCurrentPage] = useState(1);
+  const [sortConfig, setSortConfig] = useState<{ key: string; direction: 'asc' | 'desc' } | null>(null);
   const itemsPerPage = 10;
 
   useEffect(() => {
@@ -72,6 +73,106 @@ const MemberModal: React.FC<ModalProps> = ({ isOpen, onClose, user }) => {
     await getS3List(filePath)
   }
 
+  const handleSort = (key: keyof FileList) => {
+    let direction: 'asc' | 'desc' = 'asc';
+    if (sortConfig?.key === key && sortConfig.direction === 'asc') {
+      direction = 'desc';
+    }
+    setSortConfig({ key, direction });
+
+    // 파일 목록 정렬
+    const sortedList = [...fileList].sort((a, b) => {
+      if (a[key] < b[key]) return direction === 'asc' ? -1 : 1;
+      if (a[key] > b[key]) return direction === 'asc' ? 1 : -1;
+      return 0;
+    });
+
+    setFileList(sortedList); // 정렬된 파일 목록 업데이트
+  };
+
+  const renderSortIcon = (key: keyof FileList) => {
+    if (sortConfig?.key === key) {
+      return sortConfig.direction === 'asc' ? (
+        <IoIosArrowUp style={{ color: '#000' }} />
+      ) : (
+        <IoIosArrowDown style={{ color: '#000' }} />
+      );
+    }
+    // 비활성 상태 기본 화살표
+    return <IoIosArrowUp style={{ color: '#ccc' }} />;
+  };
+
+  const handleDownloadSurvey = async () => {
+    try {
+      // 설문 데이터 API 호출
+      const response = await instance.get(`/bio/admin/members/info/survey/${user?.id}`);
+      const surveyData = response.data;
+
+      if (surveyData.surveyResults.length === 0) {
+        alert('다운로드할 설문응답 데이터가 없습니다.');
+        return;
+      }
+
+    // 한글 갈망 상황을 숫자로 매핑 (한글 -> 번호)
+    const situationToNumber: { [key: string]: number } = {
+      "인간 관계 스트레스 (가족/연인 등)": 1,
+      "업무 스트레스": 2,
+      "약물관련 미디어 시청": 3,
+      "불면 및 불규칙한 일상": 4,
+      "음주 및 유흥업소 방문 (클럽/라운지 등)": 5,
+      "성충동": 6,
+      "집중도 향상을 위한 상황": 7,
+      "감정조절의 어려움": 8,
+      "지인과 약물관련 대화(말뽕)": 9,
+      "날씨변화": 10,
+      "신체적 피로감, 통증": 11,
+      "지인의 재발": 12,
+      "무료함, 지루함": 13,
+      "법적 스트레스": 14,
+      "기타 (직접입력)": 15,
+    };
+
+     // 첫 번째 설문 결과 가져오기
+     const firstResult = surveyData.surveyResults[0];
+     const firstDegree = firstResult?.degree || "N/A"; // 갈망 정도
+     const firstSituation = firstResult?.situation || "기타"; // 갈망 상황 (한글)
+ 
+     // 한글 갈망 상황을 숫자로 변환
+     const firstSituationNumber = situationToNumber[firstSituation] || 0;
+
+      // 설문 데이터를 CSV로 변환
+      const csvContent = [
+        ['번호', '갈망 정도', '갈망상황 번호','갈망 상황', '설문 시간'], // 헤더
+        ...surveyData.surveyResults.map((result: any, index: number) => [
+          index + 1,
+          result.degree,
+          situationToNumber[result.situation],
+          result.situation,
+          result.surveyTs,
+        ]),
+      ]
+        .map((row) => row.join(',')) // 각 행을 ','로 구분
+        .join('\n'); // 줄바꿈 처리
+
+      // 파일 이름 생성
+      const timestamp = new Date().toISOString(); // 현재 날짜와 시간
+      const [date, time] = timestamp.split('T');
+      const formattedDate = date.replace(/-/g, ''); // YYYYMMDD 형식
+      const [hour, minute] = time.split(':');
+      const fileName = `${user?.loginId}_${user?.name}_${formattedDate}_${parseInt(hour, 10)}시${minute}분_${firstDegree}_${firstSituationNumber}.csv`;
+
+      // 다운로드 실행
+      const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
+      const link = document.createElement('a');
+      link.href = URL.createObjectURL(blob);
+      link.download = fileName;
+      link.click();
+    } catch (error) {
+      console.error('설문응답 다운로드 실패:', error);
+      alert('설문 데이터를 가져오는 중 문제가 발생했습니다.');
+    }
+  };
+
   const currentItems = fileList.slice((currentPage - 1) * itemsPerPage, currentPage * itemsPerPage);
 
   const handlePageChange = (pageNumber: number) => setCurrentPage(pageNumber);
@@ -81,15 +182,16 @@ const MemberModal: React.FC<ModalProps> = ({ isOpen, onClose, user }) => {
   return (
     <ModalOverlay>
       <ModalContent onClick={(e) => e.stopPropagation()}>
-          <h2>Raw Data 목록</h2>
+        <h2>Raw Data 목록</h2>
         {user ? (
           <UserContainer>
             <div ><strong>ID:</strong> {user.loginId}</div>
             <div><strong>이름:</strong> {user.name}</div>
             <div><strong>휴대폰:</strong> {user.phoneNumber}</div>
             <Button onClick={() => handleGetList(`${user?.name}(${user?.loginId})`)}>
-              {loading ? 'Loading...' : 'GET LIST'}
+              {loading ? 'Loading...' : 'Get RawData list'}
             </Button>
+            <Button onClick={handleDownloadSurvey}>설문응답 download</Button>
           </UserContainer>
         ) : (
           <p>데이터를 불러오는 중입니다...</p>
@@ -98,9 +200,24 @@ const MemberModal: React.FC<ModalProps> = ({ isOpen, onClose, user }) => {
           <div style={{ width: "10%" }}>No.</div>
           <div style={{ width: "10%" }}>ID</div>
           <div style={{ width: "10%" }}>이름</div>
-          <div style={{ width: "20%" }}>업로드일</div>
-          <div style={{ width: "10%" }}>용량</div>
-          <div style={{ width: "40%" }}>파일명</div>
+          <div
+            style={{ width: "20%", cursor: "pointer" }}
+            onClick={() => handleSort('date')}
+          >
+            업로드일 {renderSortIcon('date')}
+          </div>
+          <div
+            style={{ width: "10%", cursor: "pointer" }}
+            onClick={() => handleSort('size')}
+          >
+            용량 {renderSortIcon('size')}
+          </div>
+          <div
+            style={{ width: "40%", cursor: "pointer" }}
+            onClick={() => handleSort('fileName')}
+          >
+            파일명 {renderSortIcon('fileName')}
+          </div>
         </TableHeader>
         <hr />
         <TableBody>

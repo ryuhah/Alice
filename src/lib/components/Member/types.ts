@@ -1,15 +1,37 @@
+function formatDate(isoString: string | null | undefined): string {
+    if (!isoString) {
+        return '-'; // null 또는 undefined인 경우
+    }
+
+    const date = new Date(isoString);
+    if (isNaN(date.getTime())) {
+        return '-'; // 유효하지 않은 날짜
+    }
+
+    const year = date.getFullYear();
+    const month = String(date.getMonth() + 1).padStart(2, '0');
+    const day = String(date.getDate()).padStart(2, '0');
+    const hours = String(date.getHours()).padStart(2, '0');
+    const minutes = String(date.getMinutes()).padStart(2, '0');
+    const seconds = String(date.getSeconds()).padStart(2, '0');
+
+    return `${year}-${month}-${day} ${hours}:${minutes}:${seconds}`;
+}
+
 
 export interface MemberSummary extends MemberServey {
     id: number,
     loginId: string,
     name: string,
     phoneNumber: string,
-    measureState:string
+    measureState:string,
+    uploadTs: string
 }
  
 interface MemberServey {
     degree: number,
-    situation: number
+    situation: string
+    surveyTs: string
 }
 
 interface MemberDetails {
@@ -32,8 +54,10 @@ export function initMembers(data: MemberSummary[]): MemberSummary[] {
         loginId: member.loginId,
         name: member.name,
         phoneNumber: member.phoneNumber,
+        uploadTs : formatDate(member.uploadTs),
         degree: member.degree,
         situation: member.situation,
+        surveyTs : formatDate(member.surveyTs),
         measureState : member.measureState
     }));
 }
@@ -44,8 +68,10 @@ export function patchMembers(details: MemberDetails[]): MemberSummary[] {
         loginId: data.member.loginId,
         name: data.member.name,
         phoneNumber: data.member.phoneNumber,
+        uploadTs:formatDate(data.member.uploadTs),
         degree : data.survey.degree,
         situation : data.survey.situation,
+        surveyTs : formatDate(data.survey.surveyTs),
         measureState : data.measureState
     }));
 }
