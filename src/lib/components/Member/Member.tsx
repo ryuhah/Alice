@@ -6,7 +6,7 @@ import SortBtn from '../Search/SortBtn';
 import FilterBtn from '../Search/FilterBtn';
 import instance from '../../../axios';
 import { initMembers, MemberSummary, patchMembers } from './types';
-import MemberModal from './MemberMotal';
+import MemberModal from './MemberModal';
 
 type ConditionType = 'NOT_MEASUREMENT' | 'MEASURING';
 
@@ -120,7 +120,7 @@ const Member = () => {
                 <div style={{ width: "10%" }}>이름</div>
                 <div style={{ width: "10%" }}>휴대폰</div>
                 <div style={{ width: "10%" }}>갈망정도</div>
-                <div style={{ width: "10%" }}>갈망상황</div>
+                <div style={{ width: "20%" }}>갈망상황</div>
                 <div style={{ width: "10%" }}>측정여부</div>
             </TableHeader>
             <hr />
@@ -134,7 +134,7 @@ const Member = () => {
                             <div style={{ width: "10%" }}>{item.name}</div>
                             <div style={{ width: "10%" }}>{item.phoneNumber}</div>
                             <div style={{ width: "10%" }}>{item.degree}</div>
-                            <div style={{ width: "10%" }}>{item.situation}</div>
+                            <div style={{ width: "20%" }}>{item.situation}</div>
                             <div style={{ width: "10%" }}>{conditionLabels[item.measureState as ConditionType]}</div>
                         </TableRow>
                     )

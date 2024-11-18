@@ -20,7 +20,7 @@ const MemberModal: React.FC<ModalProps> = ({ isOpen, onClose, user }) => {
   const [loading, setLoading] = useState(false);
   const [fileList, setFileList] = useState<FileList[]>([]);
   const [currentPage, setCurrentPage] = useState(1);
-  const itemsPerPage = 5;
+  const itemsPerPage = 10;
 
   useEffect(() => {
     if (isOpen) {
@@ -84,7 +84,7 @@ const MemberModal: React.FC<ModalProps> = ({ isOpen, onClose, user }) => {
           <h2>Raw Data 목록</h2>
         {user ? (
           <UserContainer>
-            <div><strong>ID:</strong> {user.loginId}</div>
+            <div ><strong>ID:</strong> {user.loginId}</div>
             <div><strong>이름:</strong> {user.name}</div>
             <div><strong>휴대폰:</strong> {user.phoneNumber}</div>
             <Button onClick={() => handleGetList(`${user?.name}(${user?.loginId})`)}>
@@ -164,7 +164,7 @@ const ModalContent = styled.div`
   padding: 20px;
   border-radius: 8px;
   text-align: center;
-  width: 800px;
+  width: 900px;
 `;
 
 const UserContainer = styled.div`
