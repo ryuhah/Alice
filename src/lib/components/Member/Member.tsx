@@ -2,6 +2,7 @@ import React, { useEffect, useState } from 'react'
 import styled from 'styled-components';
 import SearchBar from '../Search/SearchBar'
 import { IoIosArrowBack, IoIosArrowForward } from "react-icons/io";
+import { MdKeyboardDoubleArrowLeft, MdKeyboardDoubleArrowRight } from "react-icons/md";
 import SortBtn from '../Search/SortBtn';
 import FilterBtn from '../Search/FilterBtn';
 import instance from '../../../axios';
@@ -19,6 +20,9 @@ const Member = () => {
     const [filteredMembers, setFilteredMembers] = useState<MemberSummary[]>([]);
     const [currentPage, setCurrentPage] = useState(1)
     const itemsPerPage = 10;
+    const maxVisiblePages = 10;
+    const totalPages = Math.ceil(filteredMembers.length / itemsPerPage);
+    const currentItems = filteredMembers.slice((currentPage - 1) * itemsPerPage, currentPage * itemsPerPage);
     const [selectedFilters, setSelectedFilters] = useState<string[]>([])
     const [searchTerm, setSearchTerm] = useState<string>('');
     const [selectedUser, setSelectedUser] = useState<MemberSummary | undefined>(undefined);
@@ -78,17 +82,29 @@ const Member = () => {
     };
 
     // pagination
-    const currentItems = filteredMembers.slice((currentPage - 1) * itemsPerPage, currentPage * itemsPerPage);
-
-    const handlePageChange = (pageNumber: number) => setCurrentPage(pageNumber);
     const handleNextPage = () => currentPage < Math.ceil(filteredMembers.length / itemsPerPage) && setCurrentPage(currentPage + 1);
     const handlePrevPage = () => currentPage > 1 && setCurrentPage(currentPage - 1);
+    const handleJumpBackward = () => {
+        const newPage = Math.max(1, Math.floor((currentPage - 1) / 10) * 10 - 9); // 이전 10의 배수로 이동
+        setCurrentPage(newPage);
+    };
+    const handleJumpForward = () => {
+        const newPage = Math.min(totalPages, Math.floor((currentPage - 1) / 10) * 10 + 11); // 다음 10의 배수로 이동
+        setCurrentPage(newPage);
+    };
+
+    // 현재 페이지를 기준으로 시작/끝 페이지 계산
+    const startPage = Math.floor((currentPage - 1) / 10) * 10 + 1;
+    const endPage = Math.min(startPage + maxVisiblePages - 1, totalPages);
+
+    const handlePageChange = (pageNumber: number) => setCurrentPage(pageNumber);
+
 
     // Row 클릭
     const handleRowClick = async (member: MemberSummary) => {
         setSelectedUser(member);
         setIsModalOpen(true);
-    
+
         try {
             // 설문 API 호출
             const response = await instance.get(`/bio/admin/members/info/survey/${member.id}`);
@@ -145,7 +161,7 @@ const Member = () => {
                             <div style={{ width: "15%" }}>{item.surveyTs}</div>
                             <div style={{ width: "10%" }}>{item.degree}</div>
                             <div style={{ width: "20%" }}>{item.situation}</div>
-                            
+
                             <div style={{ width: "10%" }}>{conditionLabels[item.measureState as ConditionType]}</div>
                             <div style={{ width: "15%" }}>{item.uploadTs}</div>
                         </TableRow>
@@ -158,24 +174,36 @@ const Member = () => {
                 user={selectedUser}
             />
             <Pagination>
+                <PageBtn onClick={handleJumpBackward} disabled={currentPage <= 10}>
+                    <MdKeyboardDoubleArrowLeft />
+                </PageBtn>
                 <PageBtn
                     onClick={handlePrevPage}
                     disabled={currentPage === 1}>
                     <IoIosArrowBack />
                 </PageBtn>
-                {Array.from({ length: Math.ceil(filteredMembers.length / itemsPerPage) }).map((_, index) => (
-                    <PageBtn
-                        key={index + 1}
-                        isActive={currentPage === index + 1}
-                        onClick={() => handlePageChange(index + 1)}
-                    >
-                        {index + 1}
-                    </PageBtn>
-                ))}
+                {Array.from({ length: endPage - startPage + 1 }).map((_, index) => {
+                    const page = startPage + index;
+                    return (
+                        <PageBtn
+                            key={page}
+                            isActive={currentPage === page}
+                            onClick={() => handlePageChange(page)}
+                        >
+                            {page}
+                        </PageBtn>
+                    );
+                })}
                 <PageBtn
                     onClick={handleNextPage}
                     disabled={currentPage === Math.ceil(filteredMembers.length / itemsPerPage)}>
                     <IoIosArrowForward />
+                </PageBtn>
+                <PageBtn
+                    onClick={handleJumpForward}
+                    disabled={currentPage > totalPages - 10}
+                >
+                    <MdKeyboardDoubleArrowRight />
                 </PageBtn>
             </Pagination>
         </MemberContainer>

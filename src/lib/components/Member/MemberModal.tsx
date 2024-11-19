@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import styled from 'styled-components';
 import { IoIosArrowBack, IoIosArrowForward, IoIosArrowUp, IoIosArrowDown } from "react-icons/io";
+import { MdKeyboardDoubleArrowLeft, MdKeyboardDoubleArrowRight } from "react-icons/md";
 import instance from '../../../axios';
 import { FileList } from './types';
 
@@ -22,6 +23,9 @@ const MemberModal: React.FC<ModalProps> = ({ isOpen, onClose, user }) => {
   const [currentPage, setCurrentPage] = useState(1);
   const [sortConfig, setSortConfig] = useState<{ key: string; direction: 'asc' | 'desc' } | null>(null);
   const itemsPerPage = 10;
+  const maxVisiblePages = 10;
+  const totalPages = Math.ceil(fileList.length / itemsPerPage);
+  const currentItems = fileList.slice((currentPage - 1) * itemsPerPage, currentPage * itemsPerPage);
 
   useEffect(() => {
     if (isOpen) {
@@ -113,36 +117,36 @@ const MemberModal: React.FC<ModalProps> = ({ isOpen, onClose, user }) => {
         return;
       }
 
-    // 한글 갈망 상황을 숫자로 매핑 (한글 -> 번호)
-    const situationToNumber: { [key: string]: number } = {
-      "인간 관계 스트레스 (가족/연인 등)": 1,
-      "업무 스트레스": 2,
-      "약물관련 미디어 시청": 3,
-      "불면 및 불규칙한 일상": 4,
-      "음주 및 유흥업소 방문 (클럽/라운지 등)": 5,
-      "성충동": 6,
-      "집중도 향상을 위한 상황": 7,
-      "감정조절의 어려움": 8,
-      "지인과 약물관련 대화(말뽕)": 9,
-      "날씨변화": 10,
-      "신체적 피로감, 통증": 11,
-      "지인의 재발": 12,
-      "무료함, 지루함": 13,
-      "법적 스트레스": 14,
-      "기타 (직접입력)": 15,
-    };
+      // 한글 갈망 상황을 숫자로 매핑 (한글 -> 번호)
+      const situationToNumber: { [key: string]: number } = {
+        "인간 관계 스트레스 (가족/연인 등)": 1,
+        "업무 스트레스": 2,
+        "약물관련 미디어 시청": 3,
+        "불면 및 불규칙한 일상": 4,
+        "음주 및 유흥업소 방문 (클럽/라운지 등)": 5,
+        "성충동": 6,
+        "집중도 향상을 위한 상황": 7,
+        "감정조절의 어려움": 8,
+        "지인과 약물관련 대화(말뽕)": 9,
+        "날씨변화": 10,
+        "신체적 피로감, 통증": 11,
+        "지인의 재발": 12,
+        "무료함, 지루함": 13,
+        "법적 스트레스": 14,
+        "기타 (직접입력)": 15,
+      };
 
-     // 첫 번째 설문 결과 가져오기
-     const firstResult = surveyData.surveyResults[0];
-     const firstDegree = firstResult?.degree || "N/A"; // 갈망 정도
-     const firstSituation = firstResult?.situation || "기타"; // 갈망 상황 (한글)
- 
-     // 한글 갈망 상황을 숫자로 변환
-     const firstSituationNumber = situationToNumber[firstSituation] || 0;
+      // 첫 번째 설문 결과 가져오기
+      const firstResult = surveyData.surveyResults[0];
+      const firstDegree = firstResult?.degree || "N/A"; // 갈망 정도
+      const firstSituation = firstResult?.situation || "기타"; // 갈망 상황 (한글)
+
+      // 한글 갈망 상황을 숫자로 변환
+      const firstSituationNumber = situationToNumber[firstSituation] || 0;
 
       // 설문 데이터를 CSV로 변환
       const csvContent = [
-        ['번호', '갈망 정도', '갈망상황 번호','갈망 상황', '설문 시간'], // 헤더
+        ['번호', '갈망 정도', '갈망상황 번호', '갈망 상황', '설문 시간'], // 헤더
         ...surveyData.surveyResults.map((result: any, index: number) => [
           index + 1,
           result.degree,
@@ -173,11 +177,22 @@ const MemberModal: React.FC<ModalProps> = ({ isOpen, onClose, user }) => {
     }
   };
 
-  const currentItems = fileList.slice((currentPage - 1) * itemsPerPage, currentPage * itemsPerPage);
+  const handleNextPage = () => currentPage < totalPages && setCurrentPage(currentPage + 1);
+  const handlePrevPage = () => currentPage > 1 && setCurrentPage(currentPage - 1);
+  const handleJumpBackward = () => {
+    const newPage = Math.max(1, Math.floor((currentPage - 1) / 10) * 10 - 9); // 이전 10의 배수로 이동
+    setCurrentPage(newPage);
+  };
+  const handleJumpForward = () => {
+    const newPage = Math.min(totalPages, Math.floor((currentPage - 1) / 10) * 10 + 11); // 다음 10의 배수로 이동
+    setCurrentPage(newPage);
+  };
+  // 현재 페이지를 기준으로 시작/끝 페이지 계산
+  const startPage = Math.floor((currentPage - 1) / 10) * 10 + 1;
+  const endPage = Math.min(startPage + maxVisiblePages - 1, totalPages);
 
   const handlePageChange = (pageNumber: number) => setCurrentPage(pageNumber);
-  const handleNextPage = () => currentPage < Math.ceil(fileList.length / itemsPerPage) && setCurrentPage(currentPage + 1);
-  const handlePrevPage = () => currentPage > 1 && setCurrentPage(currentPage - 1);
+
 
   return (
     <ModalOverlay>
@@ -235,25 +250,47 @@ const MemberModal: React.FC<ModalProps> = ({ isOpen, onClose, user }) => {
           })}
         </TableBody>
         <Pagination>
-          <PageBtn
-            onClick={handlePrevPage}
-            disabled={currentPage === 1}>
+        <Pagination>
+          {/* 10 페이지 뒤로 버튼 */}
+          <PageBtn onClick={handleJumpBackward} disabled={currentPage <= 10}>
+            <MdKeyboardDoubleArrowLeft />
+          </PageBtn>
+
+          {/* 이전 페이지 버튼 */}
+          <PageBtn onClick={handlePrevPage} disabled={currentPage === 1}>
             <IoIosArrowBack />
           </PageBtn>
-          {Array.from({ length: Math.ceil(fileList.length / itemsPerPage) }).map((_, index) => (
-            <PageBtn
-              key={index + 1}
-              isActive={currentPage === index + 1}
-              onClick={() => handlePageChange(index + 1)}
-            >
-              {index + 1}
-            </PageBtn>
-          ))}
+
+          {/* 숫자 버튼 (동적 범위) */}
+          {Array.from({ length: endPage - startPage + 1 }).map((_, index) => {
+            const page = startPage + index;
+            return (
+              <PageBtn
+                key={page}
+                isActive={currentPage === page}
+                onClick={() => handlePageChange(page)}
+              >
+                {page}
+              </PageBtn>
+            );
+          })}
+
+          {/* 다음 페이지 버튼 */}
           <PageBtn
             onClick={handleNextPage}
-            disabled={currentPage === Math.ceil(fileList.length / itemsPerPage)}>
+            disabled={currentPage === totalPages}
+          >
             <IoIosArrowForward />
           </PageBtn>
+
+          {/* 10 페이지 앞으로 버튼 */}
+          <PageBtn
+            onClick={handleJumpForward}
+            disabled={currentPage > totalPages - 10}
+          >
+            <MdKeyboardDoubleArrowRight />
+          </PageBtn>
+        </Pagination> 
         </Pagination>
         <CloseButton onClick={onClose}>닫기</CloseButton>
       </ModalContent>
