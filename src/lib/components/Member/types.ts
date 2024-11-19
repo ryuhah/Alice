@@ -1,4 +1,4 @@
-function formatDate(isoString: string | null | undefined): string {
+function formatDate(isoString: string | null | undefined, addHours: number = 0): string {
     if (!isoString) {
         return '-'; // null 또는 undefined인 경우
     }
@@ -6,6 +6,10 @@ function formatDate(isoString: string | null | undefined): string {
     const date = new Date(isoString);
     if (isNaN(date.getTime())) {
         return '-'; // 유효하지 않은 날짜
+    }
+     // 필요한 경우 시간 더하기
+     if (addHours !== 0) {
+        date.setHours(date.getHours() + addHours);
     }
 
     const year = date.getFullYear();
@@ -54,7 +58,7 @@ export function initMembers(data: MemberSummary[]): MemberSummary[] {
         loginId: member.loginId,
         name: member.name,
         phoneNumber: member.phoneNumber,
-        uploadTs : formatDate(member.uploadTs),
+        uploadTs : formatDate(member.uploadTs, 9),
         degree: member.degree,
         situation: member.situation,
         surveyTs : formatDate(member.surveyTs),
@@ -68,7 +72,7 @@ export function patchMembers(details: MemberDetails[]): MemberSummary[] {
         loginId: data.member.loginId,
         name: data.member.name,
         phoneNumber: data.member.phoneNumber,
-        uploadTs:formatDate(data.member.uploadTs),
+        uploadTs:formatDate(data.member.uploadTs,9),
         degree : data.survey.degree,
         situation : data.survey.situation,
         surveyTs : formatDate(data.survey.surveyTs),

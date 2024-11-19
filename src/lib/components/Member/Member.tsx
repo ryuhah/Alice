@@ -31,7 +31,7 @@ const Member = () => {
     useEffect(() => {
         const fatchInfo = async () => {
             try {
-                const response = await instance.get('/bio/admin/members/info')
+                const response = await instance.get('/bio/admin/members/info/condition')
                 const members: MemberSummary[] = initMembers(response.data);
                 setMembers(members)
                 setFilteredMembers(members)

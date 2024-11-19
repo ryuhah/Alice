@@ -177,6 +177,7 @@ const MemberModal: React.FC<ModalProps> = ({ isOpen, onClose, user }) => {
     }
   };
 
+  // pagination
   const handleNextPage = () => currentPage < totalPages && setCurrentPage(currentPage + 1);
   const handlePrevPage = () => currentPage > 1 && setCurrentPage(currentPage - 1);
   const handleJumpBackward = () => {
