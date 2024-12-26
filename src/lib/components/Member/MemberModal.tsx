@@ -166,14 +166,14 @@ const MemberModal: React.FC<ModalProps> = ({ isOpen, onClose, user }) => {
       const fileName = `${user?.loginId}_${user?.name}_${formattedDate}_${parseInt(hour, 10)}시${minute}분_${firstDegree}_${firstSituationNumber}.csv`;
 
       // 다운로드 실행
-      const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
+      const BOM = '\uFEFF';
+      const blob = new Blob([BOM + csvContent], { type: 'text/csv;charset=utf-8;' });
       const link = document.createElement('a');
       link.href = URL.createObjectURL(blob);
       link.download = fileName;
       link.click();
     } catch (error) {
-      console.error('설문응답 다운로드 실패:', error);
-      alert('설문 데이터를 가져오는 중 문제가 발생했습니다.');
+      console.error('파일 다운로드 중 오류 발생:', error);
     }
   };
 
@@ -251,47 +251,47 @@ const MemberModal: React.FC<ModalProps> = ({ isOpen, onClose, user }) => {
           })}
         </TableBody>
         <Pagination>
-        <Pagination>
-          {/* 10 페이지 뒤로 버튼 */}
-          <PageBtn onClick={handleJumpBackward} disabled={currentPage <= 10}>
-            <MdKeyboardDoubleArrowLeft />
-          </PageBtn>
+          <Pagination>
+            {/* 10 페이지 뒤로 버튼 */}
+            <PageBtn onClick={handleJumpBackward} disabled={currentPage <= 10}>
+              <MdKeyboardDoubleArrowLeft />
+            </PageBtn>
 
-          {/* 이전 페이지 버튼 */}
-          <PageBtn onClick={handlePrevPage} disabled={currentPage === 1}>
-            <IoIosArrowBack />
-          </PageBtn>
+            {/* 이전 페이지 버튼 */}
+            <PageBtn onClick={handlePrevPage} disabled={currentPage === 1}>
+              <IoIosArrowBack />
+            </PageBtn>
 
-          {/* 숫자 버튼 (동적 범위) */}
-          {Array.from({ length: endPage - startPage + 1 }).map((_, index) => {
-            const page = startPage + index;
-            return (
-              <PageBtn
-                key={page}
-                isActive={currentPage === page}
-                onClick={() => handlePageChange(page)}
-              >
-                {page}
-              </PageBtn>
-            );
-          })}
+            {/* 숫자 버튼 (동적 범위) */}
+            {Array.from({ length: endPage - startPage + 1 }).map((_, index) => {
+              const page = startPage + index;
+              return (
+                <PageBtn
+                  key={page}
+                  isActive={currentPage === page}
+                  onClick={() => handlePageChange(page)}
+                >
+                  {page}
+                </PageBtn>
+              );
+            })}
 
-          {/* 다음 페이지 버튼 */}
-          <PageBtn
-            onClick={handleNextPage}
-            disabled={currentPage === totalPages}
-          >
-            <IoIosArrowForward />
-          </PageBtn>
+            {/* 다음 페이지 버튼 */}
+            <PageBtn
+              onClick={handleNextPage}
+              disabled={currentPage === totalPages}
+            >
+              <IoIosArrowForward />
+            </PageBtn>
 
-          {/* 10 페이지 앞으로 버튼 */}
-          <PageBtn
-            onClick={handleJumpForward}
-            disabled={currentPage > totalPages - 10}
-          >
-            <MdKeyboardDoubleArrowRight />
-          </PageBtn>
-        </Pagination> 
+            {/* 10 페이지 앞으로 버튼 */}
+            <PageBtn
+              onClick={handleJumpForward}
+              disabled={currentPage > totalPages - 10}
+            >
+              <MdKeyboardDoubleArrowRight />
+            </PageBtn>
+          </Pagination>
         </Pagination>
         <CloseButton onClick={onClose}>닫기</CloseButton>
       </ModalContent>
